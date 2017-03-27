@@ -16,6 +16,7 @@
 
 
 
+
 //Initialisera UART
 void uart_init(void)
 {
@@ -40,9 +41,9 @@ void uart_init(void)
 void spi_init(void)
 {
 	//Sätter MOSI och SCK till outputs
-	DDRB = (1<<5)|(1<<7);
-	/* Enable SPI, Master, set clock rate fck/16 */
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0)|(1<<SPIE);
+	DDRB = (1<<5)|(1<<7)|(1<<4);
+	// Enable SPI, Master, set clock rate fck/16 
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)|(1<<SPIE);
 }
 
 void transmit_uart0(unsigned char data)
@@ -65,8 +66,6 @@ void transmit_spi(unsigned char data)
 {
 	//Skicka data
 	SPDR = data;
-	//Vänta tills överföringen är klar
-	while(!(SPSR & (1<<SPIF)));
 }
 
 
@@ -99,11 +98,25 @@ int main(void)
 	uart_init();
 	spi_init();
 	
-    /* Replace with your application code */
     while (1) 
     {
-		transmit_uart0(uart0_indata);
-		_delay_ms(500);
+		if (uart0_indata == 0x77)
+		{
+			transmit_spi(0x02);
+		}
+		else if (uart0_indata == 0x73 )
+		{
+			transmit_spi(0x04);
+		}
+		else if (uart0_indata == 0x61)
+		{
+			transmit_spi(0x08);
+		}
+		else if (uart0_indata == 0x64)
+		{
+			transmit_spi(0x10);
+		}
+		transmit_uart0(spi_indata);
+		_delay_ms(200);
     }
 }
-
