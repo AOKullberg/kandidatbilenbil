@@ -116,6 +116,7 @@ int main(void)
 		{
 			transmit_spi(0x10);
 		}
+		transmit_spi(0x00);
 		transmit_uart0(spi_indata);
 		_delay_ms(200);
     }
