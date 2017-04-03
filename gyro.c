@@ -94,10 +94,10 @@ ISR(USART1_RX_vect)
 }
 
 //Avbrottsrutin då ny data mottagits via I2C
-ISR(TWI_vect)
+/*ISR(TWI_vect)
 {
 	i2c_indata=TWDR;
-}
+}*/
 
 //Svänger hjulen vänster
 void turn_left(void)
@@ -200,7 +200,7 @@ struct IMURawData_S
 void I2C_INT();
 uint8_t SetUpIMU();
 uint8_t SendI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t Data);
-uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register/*, uint8_t *Data*/);
+uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t *Data);
 
 /// Sets up the I2C ///
 void I2C_INT()
@@ -246,7 +246,7 @@ uint8_t SendI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t Data)
 	return 0;
 }
 
-uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register/*,uint8_t *Data*/)
+uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register,uint8_t *Data)
 {
 	/// Set start ///
 	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);	
@@ -288,28 +288,26 @@ uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register/*,uint8_t *Data*/)
 	
 	/// Stop bit ///
 	TWCR = (1<<TWINT) | (1<<TWSTO);
-	//*Data = TWDR;
+	
+	*Data = TWDR;
 	
 	return 0;
 }
 
 uint8_t SetUpIMU()
 {
-	//uint8_t RegisterData;
+	uint8_t RegisterData;
 	
 	I2C_INT();
 	_delay_ms(10);
 	
 	/// Set up the AngularVelocity /// WIP
-	if( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_WHO_AM_I_Register/*,  &RegisterData*/) )
+	if( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_WHO_AM_I_Register,  &RegisterData) )
 	return -1;
-	//if( RegisterData != AngularVelocity_WHO_AM_I_RegisterDefault)
-	//return -1;
+	if( RegisterData != AngularVelocity_WHO_AM_I_RegisterDefault)
+	return -1;
 	
 	if( SendI2CData(AngularVelocitySlaveAddress, AngularVelocity_CTRL1_Register, 0x0F) )   /// Enable stuff WIP (fast with high cut off freq?)
-	return -1;
-	
-	if ( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register) )
 	return -1;
 
 	return 0;
@@ -340,22 +338,31 @@ uint8_t IMUGAngularVelocity_L()
 
 */
 
+
+
 int main(void)
 {
-	//sei();
-	//uart_init();
-	//spi_init();
-	//pwm_init();
+	sei();
+	uart_init();
+	spi_init();
+	pwm_init();
+	uint8_t HighData;
+	uint8_t LowData;
 
 	SetUpIMU();
 	
 	while (1)
 	{
-	execute_command(spi_indata);	
-	OCR1A=steering_degree;
-	OCR1B=motor_speed;
-	transmit_spi(TWDR);
-	_delay_ms(1000);
+	//execute_command(spi_indata);	
+	//OCR1A=steering_degree;
+	//OCR1B=motor_speed;
+		
+	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register, &HighData);
+	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);
+	
+	transmit_spi(HighData);
+	transmit_spi(LowData);
+	_delay_ms(200);
 	}
 	
 
