@@ -99,22 +99,27 @@ int ping_laser_distance(i2cReadWrite i2c ){
 	}
 	
 	//Läs mätresultat
-	i2c.readi2cData(0x8f, RxBuffer, 2);
-	data = RxBuffer[1] + RxBuffer[0];
+	i2c.readi2cData(0x10, RxBuffer, 1);
+	data = RxBuffer[0] ;
 	
 	return data;
 	
 }
 
-int main(void)
-{
-	i2cReadWrite i2c;
-	i2c.setup("/dev/i2c-1");
-	
+void reset_i2c(i2cReadWrite i2c){
+
 	unsigned char reset[1]{0};
-	
 	i2c.writei2cData(0x00, reset, 1);
 	delay(100);
+
+}
+
+/*
+int main(void)
+{
+
+	
+
 	while(1){
 		
 		cout << ping_laser_distance(i2c) << endl;
@@ -123,6 +128,6 @@ int main(void)
 	
 
 }
-
+*/
 
 
