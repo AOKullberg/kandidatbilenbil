@@ -3,13 +3,14 @@
  *
  * Created: 2017-03-27 12:55:17
  * Author : Tobias Fridén
- */ 
+ */
 
 #define F_CPU 14745600UL
 
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <string.h>
 
 #define BAUD 115200		//Sätter baudrate (bps)
 #define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
@@ -17,6 +18,8 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
+#define Kp 1	//definiera Kp och Kd
+#define Kd 1
 
 //Initialisera PWM-signaler
 void pwm_init(void)
@@ -31,7 +34,7 @@ void pwm_init(void)
 
 //Initialisera UART
 void uart_init(void)
-{	
+{
 	//Aktivera UART1
 	UBRR1H = (BAUDRATE>>8);
 	UBRR1L = BAUDRATE;
@@ -77,6 +80,7 @@ volatile uint16_t motor_speed = 340;
 //Senast utfört kommando
 volatile unsigned char executed_command = 0x00;
 
+int klocka = 0;
 
 //Avbrottsrutin då ny data mottagits via SPI
 ISR(SPI_STC_vect)
@@ -88,24 +92,43 @@ ISR(SPI_STC_vect)
 ISR(USART1_RX_vect)
 {
 	uart1_indata=UDR1;
+	if (klocka == 0)
+	{
+		check_distance_forward(uart1_indata);
+	}
+	if (klocka == 1)
+	{
+		check_distance_behind(uart1_indata);
+	}
+	if (klocka == 3)
+	{
+		cli();
+		pd_steering_control(desired_distance_right, uart1_indata, prior_error_right, right);
+		sei();
+	}
+	if (klocka == 4)
+	{
+		cli();
+		pd_steering_control(desired_distance_left, uart1_indata, prior_error_left, left);
+	}
 }
 
 //Svänger hjulen vänster
-void turn_left(void)
+void turn_left(uint8_t data=0x04)
 {
 	if (steering_degree < 400 )
 	{
-				steering_degree += 4;
-	}		
+				steering_degree += data;
+	}
 }
 
 //Svänger hjulen höger
-void turn_right(void)
+void turn_right(uint8_t data=0x04)
 {
 	if (steering_degree > 250 )
 	{
-		steering_degree -= 4;
-	}	
+		steering_degree -= data;
+	}
 }
 
 //Accelererar bilen
@@ -118,7 +141,7 @@ void accelerate(void)
 	else if (motor_speed < 350 )
 	{
 		motor_speed += 1;
-	}	
+	}
 }
 
 //Sänker farten/backar
@@ -165,7 +188,7 @@ void execute_command(unsigned char newcommand)
 	executed_command = 0x00;
 	if(CHECK_BIT(newcommand,0))
 	{
-		//Autonom körning implementeras senare
+		autnomous_driving();
 	}
 	else
 	{
@@ -173,6 +196,42 @@ void execute_command(unsigned char newcommand)
 	}
 }
 
+volatile uint8_t prior_error_right = 0x00;
+volatile uint8_t prior_error_left = 0x00;
+uint8_t desired_distance_right = 32;	//millimeter
+uint8_t desired_distance_left = 32;	//millimeter
+
+void check_sensorvalues(unsigned char sensorvalues){}
+
+uint8_t calculate_error(uint8_t desired_distance, uint8_t actual_distance)
+{
+	uint8_t error = desired_distance - actual_distance;
+	return error;
+}
+
+uint8_t derivative(uint8_t error, uint8_t prior_error)
+{
+	uint8_t derivative = (error - prior_error)/iteration_time;
+	return derivative;
+}
+
+void pd_steering_control(uint8_t desired_distance, uint8_t actual_distance, uint8_t prior_error, string direction)
+{
+	uint8_t error = calculate_error(desired_distance, actual_distance);
+	uint8_t derivative = derivative(error, prior_error);
+	if(error > 0)
+	{
+		if(direction == right)
+		{
+			turn_left(error*Kp+Kd*derivative);
+		}
+		else if(direction == left)
+		{
+			turn_right(error*Kp+Kd*derivative);
+		}
+	}
+	prior_error = error;
+}
 
 int main(void)
 {
@@ -180,19 +239,15 @@ int main(void)
 	uart_init();
 	spi_init();
 	pwm_init();
-	
+
 
 	while (1)
 	{
-	execute_command(spi_indata);	
+	execute_command(spi_indata);
 	OCR1A=steering_degree;
 	OCR1B=motor_speed;
 	transmit_spi(executed_command);
 	_delay_ms(100);
 	}
-	
+
 }
-
-
-
-	
