@@ -14,7 +14,17 @@
 #define BAUD 115200		//Sätter baudrate (bps)
 #define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)  
 
+/*Globala variabler
+*/
+volatile unsigned char uart0_indata = 0x00;
+volatile unsigned char uart1_indata = 0x65;
+volatile unsigned char spi_indata = 0x00;
 
+volatile unsigned char velocity = 0x00;
+volatile unsigned char distance_front = 0x00;
+volatile unsigned char distance_back = 0x00;
+unsigned char ack = 0x61;
+int counter = 0;
 
 
 //Initialisera UART
@@ -68,10 +78,43 @@ void transmit_spi(unsigned char data)
 	SPDR = data;
 }
 
+void blink_led(int nr)
+{
+	DDRC=(1<<nr);
+	PORTC=(1<<nr);
+	_delay_ms(10);
+	PORTC=(0<<nr);
+}
 
-volatile unsigned char uart0_indata = 0x00;
-volatile unsigned char uart1_indata = 0x00;
-volatile unsigned char spi_indata = 0x00;
+void get_sensor_data(unsigned char data)
+{
+	switch(counter)
+	{
+		case 0 :
+		distance_front=data;
+		++counter;
+		break;
+		
+		case 1 :
+		distance_back=data;
+		++counter;
+		break;
+		
+		case 2 :
+		if (data == ack)
+		{
+			blink_led(6);
+			counter=0;
+		}
+		else
+		{
+			blink_led(7);
+		}
+		break;
+	}
+}
+
+
 
 	
 
@@ -87,8 +130,9 @@ ISR(USART0_RX_vect)
 
 ISR(USART1_RX_vect)
 {
-	uart1_indata=UDR1;
+	get_sensor_data(UDR1);
 }
+
 
 
 
@@ -100,6 +144,7 @@ int main(void)
 	
     while (1) 
     {
+		/*
 		if (uart0_indata == 0x77)
 		{
 			transmit_spi(0x02);
@@ -116,8 +161,11 @@ int main(void)
 		{
 			transmit_spi(0x10);
 		}
-		transmit_spi(0x00);
-		transmit_uart0(spi_indata);
-		_delay_ms(200);
+		*/
+		transmit_uart0(distance_front);
+		_delay_ms(500);
+		transmit_uart0(distance_back);
+		_delay_ms(500);
     }
 }
+
