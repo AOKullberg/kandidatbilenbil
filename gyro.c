@@ -1,9 +1,9 @@
 /*
- * STYR.c
+ * GYRO_170404.c
  *
- * Created: 2017-03-27 12:55:17
- * Author : Tobias Fridén
- */ 
+ * Created: 4/4/2017 10:15:45 AM
+ *  Author: kargu357
+ */  
 
 #define F_CPU 14745600UL
 
@@ -12,10 +12,10 @@
 #include <avr/interrupt.h>
 #include <compat/twi.h>
 
-#define BAUD 115200		//Sätter baudrate (bps)
+#define BAUD 115200		//SÃ¤tter baudrate (bps)
 #define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
 
-//Macro för att undersöka en specifik bit
+//Macro fÃ¶r att undersÃ¶ka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 
@@ -38,29 +38,29 @@ void uart_init(void)
 	UBRR1L = BAUDRATE;
 	//Aktivera reciever och transmitter
 	UCSR1B = (1<<RXEN1)|(1<<TXEN1)|(1<<RXCIE1);
-	// Sätter frame format: 8data, 2stop bit
+	// SÃ¤tter frame format: 8data, 2stop bit
 	UCSR1C = (1<<USBS1)|(3<<UCSZ10);
 }
 
 //Initialisera SPI
 void spi_init(void)
 {
-	//Sätter MISO till output
+	//SÃ¤tter MISO till output
 	DDRB = (1<<6);
 	/* Enable SPI, Slave, set clock rate fck/16 */
 	SPCR = (1<<SPE)|(1<<SPIE);
 }
 
-//Skicka data över uart1
+//Skicka data Ã¶ver uart1
 void transmit_uart1(unsigned char data)
 {
-	//Väntar på att utdatabuffer ska bli tom
+	//VÃ¤ntar pÃ¥ att utdatabuffer ska bli tom
 	while ( !( UCSR1A & (1<<UDRE1)) );
 	//Skickar data
 	UDR1 = data;
 }
 
-//Skicka data över SPI
+//Skicka data Ã¶ver SPI
 void transmit_spi(unsigned char data)
 {
 	//Skicka data
@@ -73,33 +73,33 @@ volatile unsigned char uart1_indata = 0x00;
 volatile unsigned char spi_indata = 0x00;
 //senast mottagen data via I2C
 volatile unsigned char i2c_indata = 0x00;
-//Räknare för pwm-signal till styrservo
+//RÃ¤knare fÃ¶r pwm-signal till styrservo
 volatile uint16_t steering_degree = 320;
-//Räknare för pwm-signal till motorservo
+//RÃ¤knare fÃ¶r pwm-signal till motorservo
 volatile uint16_t motor_speed = 340;
-//Senast utfört kommando
+//Senast utfÃ¶rt kommando
 volatile unsigned char executed_command = 0x00;
 
 
-//Avbrottsrutin då ny data mottagits via SPI
+//Avbrottsrutin dÃ¥ ny data mottagits via SPI
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
 }
 
-//Avbrottsrutin då ny data mottagits via UART
+//Avbrottsrutin dÃ¥ ny data mottagits via UART
 ISR(USART1_RX_vect)
 {
 	uart1_indata=UDR1;
 }
 
-//Avbrottsrutin då ny data mottagits via I2C
+//Avbrottsrutin dÃ¥ ny data mottagits via I2C
 /*ISR(TWI_vect)
 {
 	i2c_indata=TWDR;
 }*/
 
-//Svänger hjulen vänster
+//SvÃ¤nger hjulen vÃ¤nster
 void turn_left(void)
 {
 	if (steering_degree < 400 )
@@ -108,7 +108,7 @@ void turn_left(void)
 	}		
 }
 
-//Svänger hjulen höger
+//SvÃ¤nger hjulen hÃ¶ger
 void turn_right(void)
 {
 	if (steering_degree > 250 )
@@ -130,7 +130,7 @@ void accelerate(void)
 	}	
 }
 
-//Sänker farten/backar
+//SÃ¤nker farten/backar
 void retardate(void)
 {
 	if (motor_speed > 340 )
@@ -143,7 +143,7 @@ void retardate(void)
 	}
 }
 
-//Utför manuellt kommando
+//UtfÃ¶r manuellt kommando
 void manual_command(unsigned char newcommand)
 {
 	if (CHECK_BIT(newcommand,1))
@@ -168,13 +168,13 @@ void manual_command(unsigned char newcommand)
 	}
 }
 
-//Hämtar vilket kommando som skall utföras givet insignal
+//HÃ¤mtar vilket kommando som skall utfÃ¶ras givet insignal
 void execute_command(unsigned char newcommand)
 {
 	executed_command = 0x00;
 	if(CHECK_BIT(newcommand,0))
 	{
-		//Autonom körning implementeras senare
+		//Autonom kÃ¶rning implementeras senare
 	}
 	else
 	{
@@ -182,32 +182,29 @@ void execute_command(unsigned char newcommand)
 	}
 }
 
-/*
-struct IMURawData_S
-{
-	uint16_t AngularVelocityZ;
-};
-*/
-#define AngularVelocitySlaveAddress 0xD6
-#define AngularVelocity_WHO_AM_I_Register 0x0F  // Device identification register
-#define AngularVelocity_WHO_AM_I_RegisterDefault 0xD7 //D4?
-#define AngularVelocity_CTRL1_Register 0x20     // Enable axis, bandwidth, and output data rate
-#define AngularVelocity_OUT_Z_L_Register 0x2C   // Z axes AngularVelocity Low bit
-#define AngularVelocity_OUT_Z_H_Register 0x2D   // Z axes AngularVelocity High bit
 
-#define SCL_CLOCK 100000L
+#define AngularVelocitySlaveAddress 0xD6	//address to gyro
+#define AngularVelocity_WHO_AM_I_Register 0x0F  // Identifikationsregister fÃ¶r gyrot
+#define AngularVelocity_WHO_AM_I_RegisterDefault 0xD7 //defaultvÃ¤rde
+#define AngularVelocity_CTRL1_Register 0x20     // Enabla axlar, bandbredd och ouput data rate
+#define AngularVelocity_OUT_Z_L_Register 0x2C   // Z-axel Gyro LÃ¥g byte
+#define AngularVelocity_OUT_Z_H_Register 0x2D   // Z-axel Gyro HÃ¶g byte
+
+#define SCL_CLOCK 100000L	//Intern klocka gyro
+#define G_GAIN 0.00875		//NoggrannhetsmÃ¥tt
 
 void I2C_INT();
 uint8_t SetUpIMU();
 uint8_t SendI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t Data);
 uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t *Data);
+float ConvertToAngles(uint16_t Data);
 
-/// Sets up the I2C ///
+/// Initierar I2C ///
 void I2C_INT()
 {	
-	TWBR = ((F_CPU/SCL_CLOCK)-16)/2;                // [Bit rate register] controls signal speed p.232
-	TWCR = (1<<TWEN);								//     // [Control register] p.232
-	TWSR = 0;									//&= ~((1<<TWPS1) | (1<<TWPS0));             // [Status register 0-1] controls signal speed p.234
+	TWBR = ((F_CPU/SCL_CLOCK)-16)/2;                
+	TWCR = (1<<TWEN);								
+	TWSR = 0;
 	return;
 }
 
@@ -215,32 +212,32 @@ uint8_t SendI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t Data)
 {
 	/// Set start ///
 	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-	while (!(TWCR & (1<<TWINT)));   // wait
+	while (!(TWCR & (1<<TWINT)));   // vÃ¤nta
 	if ((TWSR & 0xF8) != 0x08)
 	return -1;
 
-	/// Send slave address + w ///
+	/// Skicka slave address + write ///
 	TWDR = SlaveAddress;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
 	if ((TWSR & 0xF8) != 0x18)
 	return -2;
 	
-	/// Send sub address ///
+	/// Skicka sub address ///
 	TWDR = Register;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
 	if ((TWSR & 0xF8) != 0x28)
 	return -3;
 	
-	/// Send  Data ///
+	/// Skicka Data ///
 	TWDR = Data;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
 	if ((TWSR & 0xF8) != 0x28)
 	return -4;
 	
-	/// Stop bit ///
+	/// Stoppbit ///
 	TWCR = (1<<TWINT) | (1<<TWSTO);
 	
 	return 0;
@@ -254,7 +251,7 @@ uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register,uint8_t *Data)
 	if ((TWSR & 0xF8) != 0x08)
 	return -1;
 
-	/// Send slave address + w ///
+	/// Skicka slave address + write ///
 	TWDR = SlaveAddress;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
@@ -262,31 +259,31 @@ uint8_t GetI2CData(uint8_t SlaveAddress, uint8_t Register,uint8_t *Data)
 	//    if ((TWSR & 0xF8) != 0x48)
 	return -2;
 
-	/// Send  sub address ///
+	/// Skicka sub address ///
 	TWDR = Register;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
 	if ((TWSR & 0xF8) != 0x28)
 	return -3;
 	
-	/// Set repeat start ///
+	/// Skicka repeated start ///
 	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));   // wait
 	if ((TWSR & 0xF8) != 0x10)
 	return -4;
 	
-	/// Send slave address + r ///
+	/// Skicka slave address + read ///
 	TWDR = SlaveAddress | 0x01;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));   // wait
 	if ((TWSR & 0xF8) != 0x40)
 	return -5;
 	
-	/// Get data ///
+	/// HÃ¤mta data ///
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));   // wait
 	
-	/// Stop bit ///
+	/// Stoppbit ///
 	TWCR = (1<<TWINT) | (1<<TWSTO);
 	
 	*Data = TWDR;
@@ -301,43 +298,38 @@ uint8_t SetUpIMU()
 	I2C_INT();
 	_delay_ms(10);
 	
-	/// Set up the AngularVelocity /// WIP
+	/// Initialisering av gyrot i sensorn /// 
 	if( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_WHO_AM_I_Register,  &RegisterData) )
 	return -1;
-	if( RegisterData != AngularVelocity_WHO_AM_I_RegisterDefault)
+	if( RegisterData != AngularVelocity_WHO_AM_I_RegisterDefault)	//Kontrollera att vi kommunicerar med rÃ¤tt slave
 	return -1;
 	
-	if( SendI2CData(AngularVelocitySlaveAddress, AngularVelocity_CTRL1_Register, 0x0F) )   /// Enable stuff WIP (fast with high cut off freq?)
+	if( SendI2CData(AngularVelocitySlaveAddress, AngularVelocity_CTRL1_Register, 0x0F) )   /// Setup
 	return -1;
 
 	return 0;
 }
 
-//uint16_t AngularVelocityZ;
-
-/*
-uint8_t IMUGAngularVelocity_H()
-{	
-	if ( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register) )
-	return -1;
-	//if ( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register,  (uint8_t*)&(AngularVelocityZ) + 1  ) )
-	//return -1;
-	
-	return 0;
-}
-
-uint8_t IMUGAngularVelocity_L()
+//Koverterar sensorvÃ¤rden till grader
+float ConvertToAngles(uint16_t Data)
 {
-	if ( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register ) )
-	return -1;
-	//if ( GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register,  (uint8_t*)&(AngularVelocityZ) + 1  ) )
-	//return -1;
-	
-	return 0;
+	float DegreesPerSecond;
+	float Angle;
+	uint16_t NegData = (Data ^ 0xffff) + 1;	//GÃ¶r om frÃ¥n tvÃ¥-komplement till "vanliga vÃ¤rden"
+	if ((Data & 0x8000) == 0x8000)	//Kontrollera om data Ã¤r negativ
+	{
+		DegreesPerSecond = (float) NegData * G_GAIN;
+		Angle = DegreesPerSecond * 0.2008;
+		Angle = -Angle;
+	}
+	else
+	{
+		DegreesPerSecond = (float) Data * G_GAIN;
+		Angle = DegreesPerSecond * 0.2008;
+	}
+
+	return Angle;
 }
-
-*/
-
 
 
 int main(void)
@@ -346,27 +338,22 @@ int main(void)
 	uart_init();
 	spi_init();
 	pwm_init();
-	uint8_t HighData;
+	uint8_t HighData;	
 	uint8_t LowData;
-
+	float Angle = 0;
+	
 	SetUpIMU();
 	
 	while (1)
 	{
-	//execute_command(spi_indata);	
-	//OCR1A=steering_degree;
-	//OCR1B=motor_speed;
-		
+	execute_command(spi_indata);	
+	OCR1A=steering_degree;
+	OCR1B=motor_speed;	
+	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);	//HÃ¤mta lÃ¥g och hÃ¶g databyte
 	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register, &HighData);
-	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);
-	
-	transmit_spi(HighData);
-	transmit_spi(LowData);
+	Angle += ConvertToAngles(((uint16_t)HighData << 8) | LowData);	//LÃ¤gger till skillnaden i vinkel varje loop
+	LowData = (uint8_t)Angle;
+	transmit_spi(LowData);	//skickar bara lÃ¥ga bitarna, dvs max 255 grader
 	_delay_ms(200);
 	}
-	
-
-		
-	
 }
-
