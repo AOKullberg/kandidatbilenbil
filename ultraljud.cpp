@@ -6,16 +6,18 @@
 using namespace std;
 
 
-/* FUNCTION ping_sensor_myseconds()
+/* FUNCTION ping_ultra_myseconds()
  * pingar sensorn och returnerar svarstiden i mikrosekunder
  */
-int ping_sensor_myseconds(int outputpin, int inputpin)
+int ping_ultra_myseconds(int outputpin, int inputpin)
 {
 	int mysec=0;
+	
 
 	//Gör sensorn redo för ping
 	digitalWrite(outputpin,HIGH);
-	delay(100);	
+	delayMicroseconds(50);	
+
 	
 	//Skickar ping
 	digitalWrite(outputpin,LOW);
@@ -23,50 +25,43 @@ int ping_sensor_myseconds(int outputpin, int inputpin)
 	//Väntar på positiv flank
 	while(! digitalRead(inputpin))
 	{
+		//cout << "Loop1 \n";
 		delayMicroseconds(1);
 	}
 	
 	//Räknar fram tills negativ flank
 	while( digitalRead(inputpin))
 	{
+		//cout << "Loop2 \n";
 		++mysec;
 		delayMicroseconds(1);
 	}
-	delay(100);	
-	
+	delay(50);
+
 	return mysec;
 }
 
-/* FUNCTION ping_sensor_distance()
+/* FUNCTION ping_ultra_distance()
  * pingar sensorn 5 gånger, räknar ut medelvärde och
  * returnerar avstånd i mikrometer
  */
-int ping_sensor_distance(int outputpin, int inputpin)
+int ping_ultra_distance(int outputpin, int inputpin)
 {
 	int time = 0;
-	for(int i=0;i<10;i++)
+	for(int i=0;i<5;i++)
 	{
-
-		time += ping_sensor_myseconds(outputpin, inputpin);
+		time += ping_ultra_myseconds(outputpin, inputpin);
 	}
-	
-	return (time/10)*340;
+
+	return (time/5)*340;
 }
 
-
-int main (void)
-{
-	wiringPiSetup();
-	pinMode (0, OUTPUT);
-	pinMode (1, INPUT);
-	
-	while(1)
-	{
-
-		cout << "Avstånd: " << ping_sensor_distance(0,1) << "\n";
-	}
-	
-	
-	
-
+void ultraljud_setup(){
+	pinMode (1, OUTPUT);
+	pinMode (21, INPUT);
 }
+	
+
+
+
+
