@@ -7,45 +7,71 @@
 #include "hallsensor.cpp"
 #include "laser.cpp"
 
+
 using namespace std;
 
 /* Global variables
  */
- unsigned char velocity=0;
+ unsigned char velocity = 0;
  unsigned char distance_front=0;
  unsigned char distance_back=0;
+ unsigned char distance_right=0;
+ unsigned char distance_left = 0;
  unsigned char ack = 0x61;
  int fd;
  i2cReadWrite i2c;
  
  void read_sensors(void){
- /*
- velocity=ping_hall_myseconds(26,5);
- delayMicroseconds(100);
- */
- distance_front=ping_laser_distance(i2c);
+	 
+	vector <int> ultraljud_data{0};
+	 
+	if( ping_hall_myseconds(26,5) != 0){
+		velocity=6900/ping_hall_myseconds(26,5);
+	}
+	else{
+		velocity = 0;
+	}
+	
+ cout << "Hastighet :" << (int)velocity << endl;
  delayMicroseconds(100);
  
- //cout << "Bak innan :" << ping_ultra_distance(1, 21) << endl;
- distance_back=ping_ultra_distance(1, 21);
+ distance_front=ping_laser_distance(i2c);
+ cout << "Fram: " << (int)distance_front << endl;
  delayMicroseconds(100);
+ 
+ ultraljud_data=ping_ultra_distance();
+ distance_back = ultraljud_data[1];
+ distance_right = ultraljud_data[2];
+ distance_left = ultraljud_data[3];
+ 
+ 
+ cout <<"Bak: " << (int)distance_back << endl;
+ cout <<"Höger: " << (int)distance_right << endl;
+ cout <<"Vänster:" << (int)distance_left << endl << endl;
+ 
+ 
 
  }
  
  void send_sensor_data(void){
 	 
-	/* serialPutchar(fd, velocity);
-	 delay(100); */
-	 //cout << "Fram: " << (int)distance_front;
-	 serialPutchar(fd, distance_front);
-	 delay(100);
+	 serialPutchar(fd, velocity);
+	 delay(1);
 	 
-	 //cout << "   Bak: " << (int)distance_back << endl;
+	 serialPutchar(fd, distance_front);
+	 delay(1);
+	 
 	 serialPutchar(fd, distance_back);
-	 delay(100);
+	 delay(1);
+	 
+	 serialPutchar(fd, distance_right);
+	 delay(1);
+	 
+	 serialPutchar(fd, distance_left);
+	 delay(1);
 	 
 	 serialPutchar(fd, ack);
-	 delay(100);
+	 delay(1);
  }
 
 int main(void){
@@ -69,7 +95,9 @@ int main(void){
 		
 		
 		read_sensors();
+		delay(100);
 		send_sensor_data();
+		delay(100);
 	}
 	
 			
