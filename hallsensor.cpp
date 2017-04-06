@@ -2,38 +2,53 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <algorithm>
+#include <vector>
 
 /* FUNCTION ping_hall_myseconds( int, int )
  * pingar hallsensorn på pinnen inputpin, samplar max_samples antal
- * gånger och returnerar medelvärdet
+ * gånger och returnerar medianen
  */
 int ping_hall_myseconds( int inputpin, int max_samples ){
 	
-	int mysec = 0;
+	vector<int> values{0};
+	int msec = 0;
 	int samples = 0;
 	
 	//Väntar på att pinne skall bli låg (nästa ping från magnet)
 	while( digitalRead(inputpin) ){
-		delayMicroseconds(1);
+		delay(1);
+		++msec;
+		if(msec == 200 ){
+			return 0;
+		}
 	}
+	
+	msec = 0;
 	
 	//Mäter avstånd mellan två pingar max_samples antal gånger	
 	while( samples < max_samples ){
 		
 		while( ! digitalRead(inputpin) ){
-			delayMicroseconds(1);
+			delay(1);
 		}
 		
 		while( digitalRead(inputpin) ){		
-			delayMicroseconds(1);
-			++ mysec;
+			delay(1);
+			++ msec;
 		}
-		
-		samples +=1;
+		values.push_back(msec);
+		samples++;
+		msec=0;
 	}
-	return mysec/max_samples;
+	
+	sort(values.begin(), values.end());
+		
+	return values[max_samples/2];
 }
-
+/* FUNCTION hallsensor_setup(void)
+ * Ställer in de inställningar som krävs för hallsensor
+ */
 void hallsensor_setup(void){
 	pinMode (26, INPUT);
 }
