@@ -24,9 +24,10 @@ using namespace std;
  void read_sensors(void){
 	 
 	vector <int> ultraljud_data{0};
+	int hall_data=0;
 	 
-	if( ping_hall_myseconds(26,5) != 0){
-		velocity=6900/ping_hall_myseconds(26,5);
+	if( (hall_data=ping_hall_myseconds(26,3)) != 0){
+		velocity=6900/hall_data;
 	}
 	else{
 		velocity = 0;
