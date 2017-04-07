@@ -23,6 +23,8 @@ volatile unsigned char spi_indata = 0x00;
 volatile unsigned char velocity = 0x00;
 volatile unsigned char distance_front = 0x00;
 volatile unsigned char distance_back = 0x00;
+volatile unsigned char distance_right = 0x00;
+volatile unsigned char distance_left = 0x00;
 unsigned char ack = 0x61;
 int counter = 0;
 
@@ -91,24 +93,45 @@ void get_sensor_data(unsigned char data)
 	switch(counter)
 	{
 		case 0 :
-		distance_front=data;
+		velocity=data;
+		transmit_uart0(data);
 		++counter;
 		break;
 		
 		case 1 :
-		distance_back=data;
+		distance_front=data;
+		transmit_uart0(data);
 		++counter;
 		break;
 		
 		case 2 :
+		distance_back=data;
+		//transmit_uart0(data);
+		++counter;
+		break;
+		
+		case 3 :
+		distance_right=data;
+		//transmit_uart0(data);
+		++counter;
+		break;
+		
+		case 4 :
+		distance_left = data;
+		//transmit_uart0(data);
+		++counter;
+		break;
+		
+		case 5 :
 		if (data == ack)
 		{
 			blink_led(6);
+			//transmit_uart0(data);
 			counter=0;
 		}
 		else
 		{
-			blink_led(7);
+			blink_led(1);
 		}
 		break;
 	}
@@ -126,6 +149,22 @@ ISR(SPI_STC_vect)
 ISR(USART0_RX_vect)
 {
 	uart0_indata=UDR0;
+		if (uart0_indata == 0x77)
+		{
+			transmit_spi(0x02);
+		}
+		else if (uart0_indata == 0x73 )
+		{
+			transmit_spi(0x04);
+		}
+		else if (uart0_indata == 0x61)
+		{
+			transmit_spi(0x08);
+		}
+		else if (uart0_indata == 0x64)
+		{
+			transmit_spi(0x10);
+		}
 }
 
 ISR(USART1_RX_vect)
@@ -144,28 +183,9 @@ int main(void)
 	
     while (1) 
     {
-		/*
-		if (uart0_indata == 0x77)
-		{
-			transmit_spi(0x02);
-		}
-		else if (uart0_indata == 0x73 )
-		{
-			transmit_spi(0x04);
-		}
-		else if (uart0_indata == 0x61)
-		{
-			transmit_spi(0x08);
-		}
-		else if (uart0_indata == 0x64)
-		{
-			transmit_spi(0x10);
-		}
-		*/
-		transmit_uart0(distance_front);
-		_delay_ms(500);
-		transmit_uart0(distance_back);
-		_delay_ms(500);
+		transmit_spi(0x00);
+		_delay_ms(100);		
     }
+	
 }
 
