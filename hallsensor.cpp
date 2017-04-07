@@ -19,7 +19,7 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 	while( digitalRead(inputpin) ){
 		delay(1);
 		++msec;
-		if(msec == 200 ){
+		if(msec >= 300 ){
 			return 0;
 		}
 	}
@@ -31,11 +31,22 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 		
 		while( ! digitalRead(inputpin) ){
 			delay(1);
+			++msec;
+			if(msec >= 300 ){
+				return 0;
+			}
+			
 		}
+		
+		msec = 0;
 		
 		while( digitalRead(inputpin) ){		
 			delay(1);
 			++ msec;
+			
+			if(msec >= 300 ){
+				return 0;
+			}
 		}
 		values.push_back(msec);
 		samples++;
@@ -44,7 +55,7 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 	
 	sort(values.begin(), values.end());
 		
-	return values[max_samples/2];
+	return values[max_samples/2+1];
 }
 /* FUNCTION hallsensor_setup(void)
  * Ställer in de inställningar som krävs för hallsensor
