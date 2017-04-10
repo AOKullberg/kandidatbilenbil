@@ -3,7 +3,7 @@
  *
  * Created: 4/6/2017 2:10:03 PM
  *  Author: kargu357
- */ 
+ */
 
 #include "manuell_styrning.h"
 #include "motorstyrning.h"
@@ -14,12 +14,12 @@ void manual_command(unsigned char newcommand)
 {
 	if (CHECK_BIT(newcommand,1))
 	{
-		accelerate();
+		accelerate(1);
 		executed_command |= (1<<1);
 	}
 	if (CHECK_BIT(newcommand,2))
 	{
-		retardate();
+		retardate(1);
 		executed_command |= (1<<2);
 	}
 	if (CHECK_BIT(newcommand,3))
