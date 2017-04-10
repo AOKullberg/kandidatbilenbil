@@ -12,9 +12,9 @@
 volatile unsigned char prior_error_right = 0x00;
 volatile unsigned char prior_error_left = 0x00;
 
-unsigned char calculate_error(unsigned char desired_distance, unsigned char actual_distance)
+unsigned char calculate_error(unsigned char desired, unsigned char actual)
 {
-	unsigned char error = desired_distance - actual_distance;
+	unsigned char error = desired - actual;
 	return error;
 }
 
@@ -42,9 +42,12 @@ void pd_steering_control(unsigned char desired_distance, unsigned char actual_di
 	prior_error = error;
 }
 
+
+
 void cruise_control(unsigned char wanted_velocity)
 {
-	//unsigned char distance_travelled_cruise;
+	accelerate(calculate_error(wanted_velocity,velocity) * Kp_speed)
+	/*unsigned char distance_travelled_cruise;
 	while (wanted_velocity != velocity)
 	{
 		if (velocity < wanted_velocity)
@@ -57,7 +60,7 @@ void cruise_control(unsigned char wanted_velocity)
 	}
 	//distance_travelled_cruise += velocity * 0.1;
 	//return distance_travelled_cruise;
-	return 0;
+	return 0;*/
 }
 
 
@@ -75,13 +78,12 @@ void drive_forward_distance(unsigned char distance_forward)
 	while (distance_travelled < distance_forward)
 	{
 		distance_travelled += velocity * 0.001; // Måste mäta hur lång tid loopen tar
-		if (velocity < 5)
-		{
-			accelerate();
-		}
+		cruise_control(5);
+		OCR1B=motor_speed;
 		blink_led(2);
 	}
 	break(); // får testa och se hur lång bromsstäckan blir
+	OCR1B=motor_speed;
 }
 
 

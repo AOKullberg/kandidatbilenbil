@@ -19,6 +19,7 @@
 
 #define Kp 1	//definiera Kp och Kd
 #define Kd 1
+#define Kp_speed 1
 #define iteration_time 1
 
 #define desired_distance_right 32	//millimeter

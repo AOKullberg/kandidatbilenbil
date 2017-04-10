@@ -23,7 +23,7 @@ volatile unsigned char executed_command = 0x00;
 //r�knare f�r data fr�n sensorenhet
 int counter = 0;
 
-unsigned char test_data;
+unsigned char test_flag;
 
 ///Sensordata///
 //Avst�nd fram�t
@@ -186,7 +186,7 @@ void autonomous_command(unsigned char newcommand)
 //används för att testa motorstyrningen
 ISR(INT2_vect)
 {
- test_data = 20;
+ test_flag = 1;
 }
 
 
@@ -203,10 +203,13 @@ int main(void)
 		cli();
 		execute_command(spi_indata);
 		sei();
+		if (test_flag == 1)
+		{
+			drive_forward_distance(20);
+			test_flag = 0;
+		}
 		OCR1A=steering_degree;
 		OCR1B=motor_speed;
-		drive_forward_distance(test_data);
-		test_data = 0;
 		transmit_spi(executed_command);
 		_delay_ms(100);
 	}

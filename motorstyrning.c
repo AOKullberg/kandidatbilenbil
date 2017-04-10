@@ -32,20 +32,20 @@ void turn_right(unsigned char data)
 }
 
 //Accelererar bilen
-void accelerate(void)
+void accelerate(unsigned char data)
 {
 
 	if (motor_speed < 329 )
 	{
-		motor_speed +=1;
+		motor_speed +=data;
 	}
 	else if(motor_speed < 352)
 	{
 		motor_speed = 352;
 	}
-	else if (motor_speed < 360 )
+	else if (motor_speed < 360)
 	{
-		motor_speed += 1;
+		motor_speed += data;
 	}
 
 }
