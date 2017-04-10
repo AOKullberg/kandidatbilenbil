@@ -19,6 +19,7 @@ using namespace std;
  unsigned char distance_left = 0;
  unsigned char ack = 0x61;
  int fd;
+ int styr; 
  i2cReadWrite i2c;
  
  void read_sensors(void){
@@ -39,7 +40,7 @@ using namespace std;
  distance_front=ping_laser_distance(i2c);
  cout << "Fram: " << (int)distance_front << endl;
  delayMicroseconds(100);
- 
+
  ultraljud_data=ping_ultra_distance();
  distance_back = ultraljud_data[1];
  distance_right = ultraljud_data[2];
@@ -54,8 +55,9 @@ using namespace std;
 
  }
  
- void send_sensor_data(void){
-	 
+ void send_sensor_data(int fd){
+
+	 	 
 	 serialPutchar(fd, velocity);
 	 delay(1);
 	 
@@ -77,13 +79,21 @@ using namespace std;
 
 int main(void){
 
-
+int kom;
+int styr;
 	
-	if((fd =serialOpen("/dev/ttyUSB0",115200)) < 0){
+	if((kom =serialOpen("/dev/ttyUSB0",115200)) < 0){
 		printf("Error opening serial port");
 	}
 	else{
 		cout << "Sucessfully opened on port :" << fd << endl;
+	}
+	
+	if((styr = serialOpen("/dev/ttyUSB1",115200)) < 0){
+		printf("Error opening serial port");
+	}
+	else{
+		cout << "Sucessfully opened on port :" << styr << endl;
 	}
 	
 	wiringPiSetup();
@@ -94,12 +104,10 @@ int main(void){
 	
 	while(1){
 		
-		
 		read_sensors();
 		delay(100);
-		send_sensor_data();
-		delay(100);
+		send_sensor_data(kom);
+		send_sensor_data(styr);
+		delay(100);		
 	}
-	
-			
 }
