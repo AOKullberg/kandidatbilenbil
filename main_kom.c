@@ -25,6 +25,8 @@ volatile unsigned char distance_front = 0x00;
 volatile unsigned char distance_back = 0x00;
 volatile unsigned char distance_right = 0x00;
 volatile unsigned char distance_left = 0x00;
+volatile unsigned char camera_right = 0x00;
+volatile unsigned char camera_left = 0x00;
 unsigned char ack = 0x61;
 int counter = 0;
 
@@ -123,6 +125,18 @@ void get_sensor_data(unsigned char data)
 		break;
 		
 		case 5 :
+		camera_right = data;
+		//transmit_uart0(data);
+		++counter;
+		break;	
+		
+		case 6 :
+		camera_left = data;
+		//transmit_uart0(data);
+		++counter;
+		break;	
+		
+		case 7 :
 		if (data == ack)
 		{
 			blink_led(6);
