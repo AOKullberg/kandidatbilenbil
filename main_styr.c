@@ -126,6 +126,11 @@ void get_sensor_data(unsigned char data)
 		break;
 
 		case 5 :
+		distance_to_line = data;
+		++counter;
+		break;
+
+		case 6 :
 		if (data == ack)
 		{
 			blink_led(4);
