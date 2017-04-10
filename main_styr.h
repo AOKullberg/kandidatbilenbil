@@ -3,7 +3,7 @@
  *
  * Created: 4/6/2017 1:34:25 PM
  *  Author: kargu357
- */ 
+ */
 
 
 #ifndef MAIN_STYR_H_
@@ -42,6 +42,8 @@ extern volatile unsigned char speed;
 
 
 ///Funktioner///
+void blink_led(int nr);
+void get_sensor_data(unsigned char data);
 void transmit_uart1(unsigned char data);
 void transmit_spi(unsigned char data);
 void execute_command(unsigned char newcommand);

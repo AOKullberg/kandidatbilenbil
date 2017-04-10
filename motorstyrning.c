@@ -3,55 +3,79 @@
  *
  * Created: 4/6/2017 2:09:23 PM
  *  Author: kargu357
- */ 
+ */
 
 #include "motorstyrning.h"
 
 //Räknare för pwm-signal till styrservo
 volatile unsigned short steering_degree = 320;
 //Räknare för pwm-signal till motorservo
-volatile unsigned short motor_speed = 340;
+volatile unsigned short motor_speed = 345;
 
-//Svänger hjulen vänster
-void turn_left(unsigned char data)
+
+void turn_left(void)
 {
 	if (steering_degree < 400 )
 	{
-		steering_degree += data;
+		steering_degree += 4;
 	}
 }
 
 //Svänger hjulen höger
-void turn_right(unsigned char data)
+void turn_right(void)
 {
 	if (steering_degree > 250 )
 	{
-		steering_degree -= data;
+		steering_degree -= 4;
 	}
 }
 
 //Accelererar bilen
 void accelerate(void)
 {
-	if (motor_speed < 340 )
+
+	if (motor_speed < 329 )
 	{
-		motor_speed = 340;
+		motor_speed +=1;
 	}
-	else if (motor_speed < 350 )
+	else if(motor_speed < 352)
+	{
+		motor_speed = 352;
+	}
+	else if (motor_speed < 360 )
 	{
 		motor_speed += 1;
 	}
+
 }
 
 //Sänker farten/backar
 void retardate(void)
 {
-	if (motor_speed > 340 )
+	if (motor_speed > 351 )
 	{
-		motor_speed = 340;
+		motor_speed -=1;
 	}
-	else if (motor_speed > 327 )
+	else if (motor_speed > 345 )
+	{
+		motor_speed = 345;
+	}
+	else if(motor_speed > 332 )
+	{
+		for (int i=0; i<177; i++)
+		{
+			_delay_ms(17);
+		}
+	motor_speed=332;
+	}
+	else if (motor_speed > 325 )
 	{
 		motor_speed -= 1;
 	}
+
+}
+
+void brake(void)
+{
+	motor_speed=345;
 }

@@ -3,7 +3,7 @@
  *
  * Created: 4/6/2017 9:17:15 AM
  *  Author: kargu357
- */ 
+ */
 
 #include "styr_init.h"
 #include "motorstyrning.h"
@@ -18,76 +18,128 @@
 volatile unsigned char uart1_indata = 0x00;
 //Senast mottagen data via SPI
 volatile unsigned char spi_indata = 0x00;
-//Senast utfört kommando
+//Senast utfï¿½rt kommando
 volatile unsigned char executed_command = 0x00;
-//räknare för data från sensorenhet
+//rï¿½knare fï¿½r data frï¿½n sensorenhet
 int counter = 0;
 
 ///Sensordata///
-//Avstånd framåt
+//Avstï¿½nd framï¿½t
 volatile unsigned char distance_forward;
-//Avstånd bakåt
+//Avstï¿½nd bakï¿½t
 volatile unsigned char distance_backwards;
-//Avstånd höger
+//Avstï¿½nd hï¿½ger
 volatile unsigned char distance_right;
-//Avstånd vänster
+//Avstï¿½nd vï¿½nster
 volatile unsigned char distance_left;
 //Hastighet
 volatile unsigned char speed;
 
-//Skicka data över uart1
+
+void blink_led( int nr)
+{
+	switch (nr)
+	{
+		case 1 :
+		DDRD = 1<<PD0;
+		PORTD = 1<<PD0;
+		_delay_ms(500);
+		PORTD = 0<<PD0;
+
+		case 2 :
+		DDRD = 1<<PD1;
+		PORTD = 1<<PD1;
+		_delay_ms(500);
+		PORTD = 0<<PD1;
+
+		case 3 :
+		DDRC = 1<<PC6;
+		PORTC = 1<<PC6;
+		_delay_ms(500);
+		PORTC = 0<<PC6;
+
+		case 4 :
+		DDRC = 1<<PC7;
+		PORTC = 1<<PC7;
+		_delay_ms(500);
+		PORTC = 0<<PC7;
+	}
+}
+
+//Skicka data ï¿½ver uart1
 void transmit_uart1(unsigned char data)
 {
-	//Väntar på att utdatabuffer ska bli tom
+	//Vï¿½ntar pï¿½ att utdatabuffer ska bli tom
 	while ( !( UCSR1A & (1<<UDRE1)) );
 	//Skickar data
 	UDR1 = data;
 }
 
-//Skicka data över SPI
+//Skicka data ï¿½ver SPI
 void transmit_spi(unsigned char data)
 {
 	//Skicka data
 	SPDR = data;
 }
 
-//Avbrottsrutin då ny data mottagits via SPI
+//Avbrottsrutin dï¿½ ny data mottagits via SPI
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
 }
 
-//Avbrottsrutin då ny data mottagits via UART
+//Avbrottsrutin dï¿½ ny data mottagits via UART
 ISR(USART1_RX_vect)
 {
-	uart1_indata=UDR1;
-	if (counter == 0)
+	get_sensor_data(UDR1);
+}
+
+void get_sensor_data(unsigned char data)
+{
+	switch(counter)
 	{
-		distance_forward = uart1_indata;
+		case 0 :
+		velocity=data;
+		++counter;
+		break;
+
+		case 1 :
+		distance_front=data;
+		++counter;
+		break;
+
+		case 2 :
+		distance_back=data;
+		++counter;
+		break;
+
+		case 3 :
+		distance_right=data;
+		++counter;
+		break;
+
+		case 4 :
+		distance_left = data;
+		++counter;
+		break;
+
+		case 5 :
+		if (data == ack)
+		{
+			blink_led(4);
+			counter=0;
+		}
+		else
+		{
+			blink_led(1);
+		}
+		break;
 	}
-	if (counter == 1)
-	{
-		distance_backwards = uart1_indata;
-	}
-	if (counter == 2)
-	{
-		distance_right = uart1_indata;
-	}
-	if (counter == 3)
-	{
-		distance_left = uart1_indata;
-	}
-	if (counter == 4)
-	{
-		speed = uart1_indata;
-		counter = -1;
-	}
-	
-	counter +=  1;
 }
 
 
-//Hämtar vilket kommando som skall utföras givet insignal
+
+//Hï¿½mtar vilket kommando som skall utfï¿½ras givet insignal
 void execute_command(unsigned char newcommand)
 {
 	executed_command = 0x00;
@@ -103,29 +155,29 @@ void execute_command(unsigned char newcommand)
 
 void autonomous_command(unsigned char newcommand)
 {
-	if ((newcommand & 0x80) == 0x80)	//Utfart gårdsplan
+	if ((newcommand & 0x80) == 0x80)	//Utfart gï¿½rdsplan
 	{
-		
+
 	}
-	if ((newcommand & 0x90) == 0x90)	//Infart gårdsplan
+	if ((newcommand & 0x90) == 0x90)	//Infart gï¿½rdsplan
 	{
-		
+
 	}
-	if ((newcommand & 0xa0) == 0xa0)	//Vägföljning
+	if ((newcommand & 0xa0) == 0xa0)	//Vï¿½gfï¿½ljning
 	{
 		autonomous_driving();
 	}
 	if ((newcommand & 0xb0) == 0xb0)	//korsning
 	{
-		
+
 	}
 	if ((newcommand & 0xc0) == 0xc0)	//parkeringsficka
 	{
-		
+
 	}
 	if ((newcommand & 0x0d) == 0xd0)	//parkering
 	{
-		
+
 	}
 }
 
