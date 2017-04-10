@@ -33,7 +33,7 @@ volatile unsigned char distance_right;
 //Avst�nd v�nster
 volatile unsigned char distance_left;
 //Hastighet
-volatile unsigned char speed;
+volatile unsigned char velocity;
 
 
 void blink_led( int nr)
@@ -104,12 +104,12 @@ void get_sensor_data(unsigned char data)
 		break;
 
 		case 1 :
-		distance_front=data;
+		distance_forward=data;
 		++counter;
 		break;
 
 		case 2 :
-		distance_back=data;
+		distance_backwards=data;
 		++counter;
 		break;
 

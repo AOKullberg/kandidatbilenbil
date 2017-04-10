@@ -38,7 +38,7 @@ extern volatile unsigned char distance_right;
 //Avstånd vänster
 extern volatile unsigned char distance_left;
 //Hastighet
-extern volatile unsigned char speed;
+extern volatile unsigned char velocity;
 
 
 ///Funktioner///

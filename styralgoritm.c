@@ -3,7 +3,7 @@
  *
  * Created: 4/6/2017 1:27:11 PM
  *  Author: kargu357
- */ 
+ */
 
 #include "styralgoritm.h"
 #include "main_styr.h"
@@ -42,14 +42,49 @@ void pd_steering_control(unsigned char desired_distance, unsigned char actual_di
 	prior_error = error;
 }
 
+void cruise_control(unsigned char wanted_velocity)
+{
+	//unsigned char distance_travelled_cruise;
+	while (wanted_velocity != velocity)
+	{
+		if (velocity < wanted_velocity)
+		{
+		accelerate();
+		//distance_travelled_cruise += velocity * 0.1;
+		}
+		retardate();
+		//distance_travelled_cruise += velocity * 0.1;
+	}
+	//distance_travelled_cruise += velocity * 0.1;
+	//return distance_travelled_cruise;
+	return 0;
+}
+
+
+//Kanske inte ska ligga som en egen funktion
+/*{
+	distance = velocity * 0.1;
+	return distance
+}
+*/
+
 void drive_forward(unsigned char distance_forward)
 {
-	if(distance_forward < stop_value_forward)
+	unsigned char distance_travelled;
+	distance_travelled = 0;
+	while (distance_travelled < distance_forward)
 	{
-		retardate();
+		distance_travelled += velocity * 0.001; // Måste mäta hur lång tid loopen tar
+		if (velocity < 5)
+		{
+			accelerate();
+		}
+		blink_led(2);
 	}
-	accelerate();
+	break(); // får testa och se hur lång bromsstäckan blir
 }
+
+
 
 void drive_backwards(unsigned char distance_backwards)
 {
