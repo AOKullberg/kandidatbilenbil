@@ -3,7 +3,7 @@
  *
  * Created: 4/6/2017 1:37:57 PM
  *  Author: kargu357
- */ 
+ */
 
 //Initialisera PWM-signaler
 #include "main_styr.h"
@@ -42,5 +42,3 @@ void spi_init(void)
 	/* Enable SPI, Slave, set clock rate fck/16 */
 	SPCR = (1<<SPE)|(1<<SPIE);
 }
-
-
