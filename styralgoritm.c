@@ -68,7 +68,7 @@ void cruise_control(unsigned char wanted_velocity)
 }
 */
 
-void drive_forward(unsigned char distance_forward)
+void drive_forward_distance(unsigned char distance_forward)
 {
 	unsigned char distance_travelled;
 	distance_travelled = 0;

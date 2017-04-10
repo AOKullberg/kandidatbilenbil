@@ -7,26 +7,27 @@
 
 #include "motorstyrning.h"
 
+
 //Räknare för pwm-signal till styrservo
 volatile unsigned short steering_degree = 320;
 //Räknare för pwm-signal till motorservo
 volatile unsigned short motor_speed = 345;
 
-
-void turn_left(void)
+//Svänger hjulen vänster
+void turn_left(unsigned char data)
 {
 	if (steering_degree < 400 )
 	{
-		steering_degree += 4;
+		steering_degree += data;
 	}
 }
 
 //Svänger hjulen höger
-void turn_right(void)
+void turn_right(unsigned char data)
 {
 	if (steering_degree > 250 )
 	{
-		steering_degree -= 4;
+		steering_degree -= data;
 	}
 }
 
