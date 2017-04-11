@@ -16,22 +16,18 @@ typedef uint8_t byte;
 /* Globala variabler */
 Image received_image;
 bool end_prog = false;
-bool image_ready = false;
-std::mutex mut_image;
-std::condition_variable image_cv;
+
 
 /* Deklaration av funktioner.*/
-Socket::Status init_connection(TcpSocket&, TcpSocket&);
+Socket::Status init_connection(TcpSocket&);
 int receive_image(TcpSocket&);
-void kom_main(TcpSocket&, TcpSocket&);
 
 int main()
 {
 	int connected = 0;
 	string s{};
 	TcpSocket socket;
-	TcpSocket socket2;
-	if (init_connection(socket, socket2) != Socket::Done)
+	if (init_connection(socket) != Socket::Done)
 	{
 		cerr << "Can't connect to host, please restart.\n";
 		return 0;
@@ -42,7 +38,6 @@ int main()
 	}
 
 	RenderWindow window(VideoMode(640, 480), "Kamerabild");
-	thread kommunikation(receive_image, ref(socket));
 	while (window.isOpen())
 	{
 		Event event;
@@ -53,23 +48,16 @@ int main()
 				window.close();
 			}
 		}
+		receive_image(ref(socket));
 		window.clear();
 		Texture img;
 		Sprite drawable;
-		unique_lock<mutex> lk(mut_image);
-		while(!image_ready)
-		{
-			image_cv.wait(lk);
-		}
 		img.loadFromImage(received_image);
-		image_ready = false;
-		image_cv.notify_one();
 		drawable.setTexture(img);
 		window.draw(drawable);
 		window.display();
 	}
 	end_prog = true;
-	kommunikation.join();
 	return 0;
 }
 
@@ -77,20 +65,11 @@ Socket::Status init_connection(TcpSocket& socket, TcpSocket& socket2)
 {
 	IpAddress ip;
 	unsigned short port = 8080;
-	unsigned short port2 = 8100;
 	Time timeout = seconds(120);
 	cout << "Please enter the host-IP (default: 169.254.244.250): ";
 	cin >> ip;
 	cout << "Connecting to " << ip << " on port " << port << ".\n";
-	//socket.connect(ip, port, timeout);
 	return socket.connect(ip, port, timeout);
-}
-
-void kom_main(TcpSocket& socket, TcpSocket& socket2)
-{
-	thread worker(receive_image, ref(socket));
-	receive_image(ref(socket2));
-	worker.join();
 }
 
 int receive_image(TcpSocket& socket)
@@ -133,16 +112,7 @@ int receive_image(TcpSocket& socket)
 		Image received;
 		received.create(sizeX, sizeY, UncompressedData);
 
-		/* Känslig kod (nyttjar globala variabler)
-		*/
-		unique_lock<mutex> lk(mut_image);
-		while(image_ready)
-		{
-			image_cv.wait(lk);
-		}
 		received_image = received;
-		image_ready = true;
-		image_cv.notify_one();
 
 		/* Deallokerar minne.
 		*/
