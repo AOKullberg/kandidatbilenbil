@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include <vector>
+#include "ultraljud.hpp"
 
 using namespace std;
 
@@ -37,7 +38,13 @@ vector<int> ping_ultra_myseconds()
 	while(! digitalRead(input_back))
 	{
 		delayMicroseconds(1);
+		++mysec_back;
+		if( mysec_back > 2000){
+			return {0};
+		}
 	}
+	
+	mysec_back = 0;
 	
 	while( digitalRead(input_back) || digitalRead(input_right) 
 			|| digitalRead(input_left)){
@@ -55,15 +62,13 @@ vector<int> ping_ultra_myseconds()
 				}
 				
 				delayMicroseconds(1);
+				
+				if( (mysec_back > 2000) || (mysec_right > 2000) 
+					|| (mysec_left > 2000)){
+						return {0};
+					}
 			}
 	
-	/*
-	//Räknar fram tills negativ flank
-	while( digitalRead(inputpin))
-	{
-		++mysec;
-		delayMicroseconds(1);
-	}*/
 	
 	data[0]=mysec_back;
 	data[1]=mysec_right;
@@ -104,10 +109,6 @@ vector<int> ping_ultra_distance()
 	data.push_back(back[3]*340/10000);
 	data.push_back(right[3]*340/10000);
 	data.push_back(left[3]*340/10000);
-	/*
-	for( int i : data){
-		cout << i << endl;
-	}*/
 
 	return data;
 }
