@@ -16,8 +16,8 @@ extern volatile unsigned short motor_speed;
 
 void turn_left(unsigned char data);
 void turn_right(unsigned char data);
-void accelerate(unsigned char data);
-void retardate(void);
+void accelerate(unsigned char data); 
+void retardate(unsigned char data);
 void brake(void);
 
 #endif /* MOTORSTYRNING_H_ */
