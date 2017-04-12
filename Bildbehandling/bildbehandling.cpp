@@ -26,7 +26,6 @@ extern condition_variable camera_cv;
 extern bool camera_ready;
 
 //För kommunikation med styr/kom
-extern int dist_to_side;
 extern int sign_found;
 
 /*Interna globala variabler.
@@ -34,6 +33,8 @@ extern int sign_found;
 int horizon_y = 150;
 int dist_to_right = 0;
 int dist_to_left = 0;
+int dist_to_stop = 0;
+Vec4i stop_line;
 Rect sign_roi = Rect(320,0,320,240);
 Rect line_roi = Rect(0,150,640,330);
 bool proc_sync = true;
@@ -195,7 +196,13 @@ Mat detect_lines(Mat src, Mat dst)
 		for( size_t i = 0; i < lines.size(); i++ )
 		{
 			Vec4i l = lines[i];
+			//lines består av 4 ints. xstart, ystart, xend, yend
 			line( cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,255,0), 3, 8);
+			//Om ystart ligger inom yend+-20 räknas det som en stopplinje
+			if(l[3]-20 <= l[1] <= l[3]+20)
+			{
+				stop_line = l;
+			}
 		}
 	}
 	
@@ -204,8 +211,14 @@ Mat detect_lines(Mat src, Mat dst)
 	 * från höger respektive vänster kant.
 	 */
 	Mat green_dst = split_to_green(cdst);
-	distance_to_line(green_dst(Range(230,330),Range(0,320)),0);
-	distance_to_line(green_dst(Range(230,330),Range(320,640)),1);
+	get_distance_to_line(green_dst(Range(230,330),Range(0,320)),0);
+	get_distance_to_line(green_dst(Range(230,330),Range(320,640)),1);
+	
+	if(stop_line != 0)
+	{
+		get_distance_to_stop();
+		stop_line = {};
+	}
 	
 	/* Adderar ihop cdst med ROI:t av src. Båda viktas 1.
 	 */
@@ -269,7 +282,7 @@ Mat split_to_green(Mat img)
  * Beräknar avståndet till sidlinjer genom att
  * iterera genom ett litet område av bilden.
  */
-void distance_to_line(Mat img, int left_right)
+void get_distance_to_line(Mat img, int left_right)
 {
 	int i = 0;
 	MatIterator_<uchar> it, end;
@@ -290,6 +303,15 @@ void distance_to_line(Mat img, int left_right)
 		else
 		{
 			++i;
+			if(i>=320)
+			{
+				i = 0;
+			}
 		}
 	}
+}
+
+void get_distance_to_stop()
+{
+	dist_stop = (stop_line[1]+stop_line[3])/2;
 }

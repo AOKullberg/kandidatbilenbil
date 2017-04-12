@@ -9,7 +9,8 @@
  */
 int img_proc_main();
 int process_image(int);
-void distance_to_line(cv::Mat, int);
+void get_distance_to_stop();
+void get_distance_to_line(cv::Mat, int);
 cv::Mat split_to_green(cv::Mat);
 cv::Mat detect_lines(cv::Mat, cv::Mat);
 cv::Mat detect_signs(cv::Mat);
