@@ -7,13 +7,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
+#include "laser.hpp"
 
 using namespace std;
 
 //Klass för att hantera i2c-interfacet
-class i2cReadWrite {
-	public:
-	int file_i2c; //filehandle
+
 
 
 /*FUNCTION setup(string)
@@ -21,11 +20,14 @@ class i2cReadWrite {
  * med hjälp av file_i2c. För att komma åt i2c på rpi används
  * "/dev/i2c-1" som filename. 
  */
-	void setup(string filename){
+	void i2cReadWrite::setup(string filename){
 	
 		if((file_i2c = open(filename.c_str(), O_RDWR)) < 0){
 			printf("Failed to open the i2c bus");
 			return;
+		}
+		else{
+			cout << "Successfully connected to i2c bus on port: " << file_i2c << endl;
 		}
 		
 		//Address för i2c-slaven
@@ -40,7 +42,7 @@ class i2cReadWrite {
  * Läser length antal bytes från addressen RegisterAddress hos slaven.
  * Dessa placeras i RxBuffer.
  */
-	void readi2cData(unsigned char RegisterAddress, unsigned char * RxBuffer, int length){
+	void i2cReadWrite::readi2cData(unsigned char RegisterAddress, unsigned char * RxBuffer, int length){
 		string res;
 		if (write(file_i2c, & RegisterAddress, 1) != 1){
 			printf("I2C write error");
@@ -56,7 +58,7 @@ class i2cReadWrite {
  * Skriver length antal bytes till addressen RegisterAdress hos slaven
  * från TxBuffer.
  */
-	void writei2cData(unsigned char RegisterAddress, unsigned char * TxBuffer, int length){
+	void i2cReadWrite::writei2cData(unsigned char RegisterAddress, unsigned char * TxBuffer, int length){
 		char data[length+1];
 		
 		data[0]=RegisterAddress;
@@ -70,7 +72,7 @@ class i2cReadWrite {
 		}
 	}
 
-};
+
 
 
 /*FUNCTION ping_laser_distance( i2c )
@@ -99,8 +101,14 @@ int ping_laser_distance(i2cReadWrite i2c ){
 	}
 	
 	//Läs mätresultat
-	i2c.readi2cData(0x10, RxBuffer, 1);
-	data = RxBuffer[0] ;
+	i2c.readi2cData(0x8f, RxBuffer, 2);
+	if( RxBuffer[0] >= 0x01 ){
+		data = 255;
+	}
+	else{
+		data = RxBuffer[1];
+	}
+
 	
 	return data;
 	
@@ -114,20 +122,6 @@ void reset_i2c(i2cReadWrite i2c){
 
 }
 
-/*
-int main(void)
-{
 
-	
-
-	while(1){
-		
-		cout << ping_laser_distance(i2c) << endl;
-		delay(100);
-	}
-	
-
-}
-*/
 
 
