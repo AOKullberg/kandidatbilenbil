@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include <vector>
+#include "hallsensor.hpp"
 
 /* FUNCTION ping_hall_myseconds( int, int )
  * pingar hallsensorn på pinnen inputpin, samplar max_samples antal
