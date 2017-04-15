@@ -48,8 +48,7 @@ void measure_speed()
 	while(1)
 	{
 		int hall_data = ping_hall_myseconds(26,3);
-		int x = try_lock(spd_mut);
-		if( x == -1)
+		if( spd_mut.try_lock() )
 		{
 			if(hall_data!=0)
 			{
@@ -76,8 +75,7 @@ void measure_speed()
 void read_sensors(void)
 {
 	vector <int> ultraljud_data{0};
-	int x = try_lock(spd_mut);
-	if( x == -1)
+	if( spd_mut.try_lock() )
 	{
 		velocity = buf_velocity;
 		spd_mut.unlock();
