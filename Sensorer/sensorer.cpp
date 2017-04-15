@@ -62,7 +62,7 @@ void measure_speed()
 		}
 		else
 		{
-			cerr << "Speed being accessed\n";
+			cerr << "Velocity is being sent\n";
 		}
 		
 		if(end_program)
@@ -75,15 +75,6 @@ void measure_speed()
 void read_sensors(void)
 {
 	vector <int> ultraljud_data{0};
-	if( spd_mut.try_lock() )
-	{
-		velocity = buf_velocity;
-		spd_mut.unlock();
-	}
-	else
-	{
-		cout << "Using same speed\n";
-	}
 	
 	/*
 	int hall_data = 0;
@@ -131,7 +122,15 @@ void read_sensors(void)
 }
  
  void send_data(int fd){
-	 
+	 if( spd_mut.try_lock() )
+	 {
+		velocity = buf_velocity;
+		spd_mut.unlock();
+	 }
+	 else
+	 {
+		cerr << "Velocity is updating\n"; 
+	 }
 	 serialPutchar(fd, velocity);
 	// delay(1);
 	 
