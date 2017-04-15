@@ -214,7 +214,7 @@ Mat detect_lines(Mat src, Mat dst)
 	get_distance_to_line(green_dst(Range(230,330),Range(0,320)),0);
 	get_distance_to_line(green_dst(Range(230,330),Range(320,640)),1);
 	
-	if(stop_line != 0)
+	if(!stop_line.empty())
 	{
 		get_distance_to_stop();
 		stop_line = {};
