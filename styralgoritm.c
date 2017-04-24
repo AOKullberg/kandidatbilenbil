@@ -8,6 +8,7 @@
 #include "styralgoritm.h"
 #include "main.h"
 #include "motorstyrning.h"
+#include "gyro_2.h"
 #include <avr/io.h>
 
 #define Kp_speed 1
@@ -107,5 +108,66 @@ void drive_backwards(unsigned char distance_backwards)
 	{
 		accelerate(1);
 	}
-	retardate();
+	retardate(1);
+}
+
+void turn_90_degrees(char direction, char direction_turn)
+{
+	if (direction == 'F')
+	{
+		if(direction_turn == 'R')
+		{
+			while (Angle > -80)
+			{
+				OCR1A = 259;
+				OCR1B = 358;
+				Get_Angle();
+			}
+			
+				OCR1A = 320;
+				OCR1B = 345;
+			
+		}
+		else if (direction_turn == 'L')
+		{
+			while (Angle < 80)
+			{
+				OCR1A = 373;
+				OCR1B = 358;
+				Get_Angle();
+			}
+			
+				OCR1A = 320;
+				OCR1B = 345;
+			
+		}
+	}
+	else if (direction == 'B')
+	{
+		if(direction_turn == 'R')
+		{
+			while (Angle < 80)
+			{
+				OCR1A = 259;
+				OCR1B = 327;
+				Get_Angle();
+			}
+			
+				OCR1A = 320;
+				OCR1B = 345;
+		}
+		else if (direction_turn == 'L')
+		{
+			while (Angle > -80)
+			{
+				OCR1A = 373;
+				OCR1B = 327;
+				Get_Angle();
+			}
+			
+				OCR1A = 320;
+				OCR1B = 345;
+			
+		}
+	}
 }

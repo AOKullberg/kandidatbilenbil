@@ -11,6 +11,8 @@
 #include "autonom_drive.h"
 #include "manuell_styrning.h"
 #include "styralgoritm.h"
+#include "gardsplan.h"
+#include "gyro_2.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -24,11 +26,6 @@ volatile unsigned char spi_indata = 0x00;
 volatile unsigned char executed_command = 0x00;
 //r�knare f�r data fr�n sensorenhet
 int counter = 0;
-
-//Räknare för pwm-signal till styrservo
-extern volatile unsigned short steering_degree;
-//Räknare för pwm-signal till motorservo
-extern volatile unsigned short motor_speed;
 
 unsigned char test_flag;
 
@@ -215,29 +212,38 @@ ISR(INT2_vect)
 }
 
 
+
+
 int main(void)
 {
-	sei();
-	uart_init();
-	spi_init();
-	pwm_init();
-	DDRB = 0<<PD3;
-	EIMSK = 1<<INT2;
-
-	while (1)
-	{
-		cli();
-		execute_command(spi_indata);
 		sei();
-		if (test_flag == 1)
+		uart_init();
+		spi_init();
+		pwm_init();
+		
+		SetUpIMU();
+		DDRB = 0<<PD3;
+		EIMSK = 1 <<INT2;
+			
+		while (1)
 		{
-			drive_forward_distance(1000);
-			test_flag = 0;
+			
+			if (test_flag == 1)
+			{
+				OCR1B = 328;
+				_delay_ms(1000);
+				Angle = 0;
+				turn_90_degrees('B','R');
+				OCR1B = 353;
+				/*accelerate(2);*/
+				_delay_ms(1000);
+				Angle=0;
+				turn_90_degrees('F','L');
+				test_flag = 0;
+			}
+				//skickar bara låga bitarna, dvs max 255 grader	
+			_delay_ms(100);
 		}
-		OCR1A=steering_degree;
-		OCR1B=motor_speed;
-		transmit_spi(executed_command);
-		_delay_ms(100);
-	}
+		
 
 }

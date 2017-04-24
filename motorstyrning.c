@@ -6,8 +6,16 @@
  */
 #define F_CPU 14745600UL
 
+#include "styr_init.h"
 #include "motorstyrning.h"
+#include "main.h"
+#include "autonom_drive.h"
+#include "manuell_styrning.h"
+#include "styralgoritm.h"
 #include <util/delay.h>
+#include <avr/io.h>
+
+
 
 
 //Räknare för pwm-signal till styrservo
@@ -20,18 +28,18 @@ int reversing = 0;
 //Svänger hjulen vänster
 void turn_left(unsigned char data)
 {
-	if (steering_degree < 400 )
+	if (OCR1A < 374 )
 	{
-		steering_degree += data;
+		OCR1A += data;
 	}
 }
 
 //Svänger hjulen höger
 void turn_right(unsigned char data)
 {
-	if (steering_degree > 250 )
+	if (OCR1A > 260 )
 	{
-		steering_degree -= data;
+		OCR1A -= data;
 	}
 }
 

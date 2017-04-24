@@ -12,6 +12,7 @@
  
 
 void back_out_from_garage(void);
+void first_right_turn(void);
 
 
 

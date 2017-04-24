@@ -19,7 +19,7 @@ void manual_command(unsigned char newcommand)
 	}
 	if (CHECK_BIT(newcommand,2))
 	{
-		retardate();
+		retardate(1);
 		executed_command |= (1<<2);
 	}
 	if (CHECK_BIT(newcommand,3))

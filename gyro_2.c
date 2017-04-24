@@ -11,6 +11,20 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <compat/twi.h>
+#include "gyro_2.h"
+
+volatile float Angle = 0;
+
+#define AngularVelocitySlaveAddress 0xD6	//address to gyro
+#define AngularVelocity_WHO_AM_I_Register 0x0F  // Identifikationsregister för gyrot
+#define AngularVelocity_WHO_AM_I_RegisterDefault 0xD7 //defaultvärde
+#define AngularVelocity_CTRL1_Register 0x20     // Enabla axlar, bandbredd och ouput data rate
+#define AngularVelocity_OUT_Z_L_Register 0x2C   // Z-axel Gyro Låg byte
+#define AngularVelocity_OUT_Z_H_Register 0x2D   // Z-axel Gyro Hög byte
+
+#define SCL_CLOCK 100000L	//Intern klocka gyro
+#define G_GAIN 0.00875
+
 
 
 /// Initierar I2C ///
@@ -134,14 +148,24 @@ float ConvertToAngles(uint16_t Data)
 	if ((Data & 0x8000) == 0x8000)	//Kontrollera om data är negativ
 	{
 		DegreesPerSecond = (float) NegData * G_GAIN;
-		Angle = DegreesPerSecond * 0.2008; //behöver ändra då loopen inte är samma som tidigare
+		Angle = DegreesPerSecond * 0.1; //behöver ändra då loopen inte är samma som tidigare
 		Angle = -Angle;
 	}
 	else
 	{
 		DegreesPerSecond = (float) Data * G_GAIN;
-		Angle = DegreesPerSecond * 0.2008;  //behöver ändra då loopen inte är samma som tidigare
+		Angle = DegreesPerSecond * 0.1;  //behöver ändra då loopen inte är samma som tidigare
 	}
 
 	return Angle;
+}
+
+void Get_Angle()
+{
+	uint8_t HighData;
+	uint8_t LowData;
+	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);	//Hämta låg och hög databyte
+	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register, &HighData);
+	Angle += ConvertToAngles(((uint16_t)HighData << 8) | LowData);	//Lägger till skillnaden i vinkel varje loop
+	LowData = (uint8_t)Angle;
 }

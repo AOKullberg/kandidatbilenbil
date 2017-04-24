@@ -19,6 +19,7 @@ void cruise_control(unsigned char wanted_velocity);
 void drive_forward_distance(float distance_forward);
 void drive_backwards(unsigned char distance_backwards);
 void autonomous_driving(void);
+void turn_90_degrees(char,char);
 
 
 
