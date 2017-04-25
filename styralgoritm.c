@@ -10,6 +10,7 @@
 #include "motorstyrning.h"
 #include "gyro_2.h"
 #include <avr/io.h>
+#include <util/delay.h>
 
 #define Kp_speed 1
 
@@ -111,6 +112,35 @@ void drive_backwards(unsigned char distance_backwards)
 	retardate(1);
 }
 
+void drive_for_time(char direction, int time, unsigned char speed)
+{
+	int time_passed = 0;
+	if (direction == 'F')
+	{
+		while(time >= time_passed)
+		{
+			accelerate(speed);
+			_delay_ms(200);
+			time_passed = time_passed + 1;
+		}
+		brake();
+	}
+	else if (direction == 'B')
+	{
+		while(time >= time_passed)
+		{
+			retardate(speed);
+			_delay_ms(200);
+			time_passed = time_passed + 1;
+		}
+		brake();	
+	}
+	else
+	{
+		blink_led(6);
+	}
+}
+
 void turn_90_degrees(char direction, char direction_turn)
 {
 	if (direction == 'F')
@@ -120,26 +150,26 @@ void turn_90_degrees(char direction, char direction_turn)
 			while (Angle > -80)
 			{
 				OCR1A = 259;
-				OCR1B = 358;
+				accelerate(3);
+				_delay_ms(100);
 				Get_Angle();
 			}
 			
 				OCR1A = 320;
-				OCR1B = 345;
-			
+				brake();
 		}
 		else if (direction_turn == 'L')
 		{
 			while (Angle < 80)
 			{
 				OCR1A = 373;
-				OCR1B = 358;
+				accelerate(3);
+				_delay_ms(100);
 				Get_Angle();
 			}
 			
 				OCR1A = 320;
-				OCR1B = 345;
-			
+				brake();
 		}
 	}
 	else if (direction == 'B')
@@ -149,25 +179,26 @@ void turn_90_degrees(char direction, char direction_turn)
 			while (Angle < 80)
 			{
 				OCR1A = 259;
-				OCR1B = 327;
+				retardate(3);
+				_delay_ms(100);
 				Get_Angle();
 			}
 			
 				OCR1A = 320;
-				OCR1B = 345;
+				brake();
 		}
 		else if (direction_turn == 'L')
 		{
 			while (Angle > -80)
 			{
 				OCR1A = 373;
-				OCR1B = 327;
+				retardate(3);
+				_delay_ms(100);
 				Get_Angle();
 			}
 			
 				OCR1A = 320;
-				OCR1B = 345;
-			
+				brake();
 		}
 	}
 }

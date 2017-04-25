@@ -64,6 +64,14 @@ void accelerate(unsigned char data)
 		case 4:
 		motor_speed = 356; //ungefär 95cm/s max hastighet
 		break;
+		
+		case 5:
+		motor_speed = 357;
+		break;
+		
+		case 6:
+		motor_speed = 358;
+		break;
 	}
 	OCR1B = motor_speed;
 
@@ -71,7 +79,7 @@ void accelerate(unsigned char data)
 
 void retardate(unsigned char data)
 	{
-		if (! reversing )
+		/*if (! reversing )
 		{
 			OCR1B = 345;
 			for (int i=0; i<177; i++)
@@ -79,7 +87,7 @@ void retardate(unsigned char data)
 				_delay_ms(17);
 			}
 			reversing = 1;
-		}
+		}*/
 		switch (data) {
 			case 1 :
 			OCR1B = 328;
@@ -96,7 +104,18 @@ void retardate(unsigned char data)
 			case 4 :
 			OCR1B = 325;
 			break;
-
+			
+			case 5 :
+			OCR1B = 324;
+			break;
+			
+			case 6 :
+			OCR1B = 323;
+			break;
+			
+			case 7 :
+			OCR1B = 322;
+			break;			
 		}
 	}
 
@@ -104,5 +123,5 @@ void retardate(unsigned char data)
 
 void brake(void)
 {
-	motor_speed=345;
+	OCR1B=345;
 }

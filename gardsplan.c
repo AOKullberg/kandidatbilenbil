@@ -17,17 +17,12 @@
 
 void back_out_from_garage(void)
 {
-	OCR1B = 345;
-	_delay_ms(3000);
-	OCR1B = 328;
-	_delay_ms(1000);
 	Angle = 0;
 	turn_90_degrees('B','R');
-	OCR1B = 353;
-	/*accelerate(2);*/
-	_delay_ms(1000);
-	Angle=0;
-	turn_90_degrees('F','L');
+	_delay_ms(3000);
+	drive_for_time('F', 6, 2);
+	/*Angle = 0;
+	turn_90_degrees('F','L');*/
 }
 
 

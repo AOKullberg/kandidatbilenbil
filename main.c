@@ -230,15 +230,7 @@ int main(void)
 			
 			if (test_flag == 1)
 			{
-				OCR1B = 328;
-				_delay_ms(1000);
-				Angle = 0;
-				turn_90_degrees('B','R');
-				OCR1B = 353;
-				/*accelerate(2);*/
-				_delay_ms(1000);
-				Angle=0;
-				turn_90_degrees('F','L');
+				back_out_from_garage();
 				test_flag = 0;
 			}
 				//skickar bara låga bitarna, dvs max 255 grader	
