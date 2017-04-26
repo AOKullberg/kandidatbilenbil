@@ -15,62 +15,63 @@
 
 
 
-void back_out_from_garage(void)
+void from_garage_to_house(void)
 {
-	Angle = 0;
 	turn_90_degrees('B','R');
 	_delay_ms(3000);
-	drive_for_time('F', 6, 2);
-	/*Angle = 0;
-	turn_90_degrees('F','L');*/
+	drive_forward_distance(10);
+	turn_90_degrees('F','L');
+	drive_to_stopline();
 }
 
-
-
-void first_right_turn(void)
+void in_from_upside(void)
 {
-
-  uint8_t HighData;
-	uint8_t LowData;
-	float Angle = 0;
- 
-
-  while (Angle < 85)
-  {
-    GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);	//Hämta låg och hög databyte
-    GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_H_Register, &HighData);
-    Angle += ConvertToAngles(((uint16_t)HighData << 8) | LowData);	//Lägger till skillnaden i vinkel varje loop
-    LowData = (uint8_t)Angle;
-    transmit_spi(LowData);	//skickar bara låga bitarna, dvs max 255 grader
-    _delay_ms(200);
-	blink_led(1);
-	OCR1A = 350;
-  }
-  OCR1A = 320;
-
+	turn_90_degrees('F','R');
+	drive_forward_distance(10);
+	turn_90_degrees('F','L');
+	turn_90_degrees('F','L');
+	turn_90_degrees('F','R');
+	while (distance_front > 5)
+	{
+		accelerate(1);
+	}
+	brake();
 }
 
-void drive_forward(void)
+void in_from_side(void)
 {
-  
+	turn_90_degrees('F','R');
+	turn_90_degrees('F','L');
+	turn_90_degrees('F','R');
+	while (distance_front > 5)
+	{
+		accelerate(1);
+	}
+	brake();	
 }
 
-
-
-
-
-void gardsplan(void)
+void out_from_yard(char direction)
 {
-  back_out_from_garage();
-  first_right_turn();
-  for (int i=0; i<177; i++)
-  {
-    _delay_ms(17);
-  }
-  brake();
-  turn_left(5);
+	from_garage_to_house();
+	if (direction == 'F')
+	{
+		drive_to_stopline();
+	}
+	else if (direction == 'L')
+	{
+		turn_90_degrees('F','L');
+		drive_to_stopline();
+	}
+}
 
-
-
-
+void in_to_yard(char direction)
+{
+	if (direction == 'U')
+	{
+		in_from_upside();
+	}
+	else if (direction == 'S')
+	{
+		in_from_side();	
+	}
 }

@@ -11,10 +11,11 @@
  #define fountain_distance 120;
  
 
-void back_out_from_garage(void);
-void first_right_turn(void);
-
-
+void from_garage_to_house(void);
+void in_from_upside(void);
+void in_from_side(void);
+void out_from_yard(char);
+void in_to_yard(char);
 
 
 
