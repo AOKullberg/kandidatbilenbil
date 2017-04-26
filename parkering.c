@@ -7,7 +7,9 @@
 
 #include "motorstyrning.h"
 #include "main.h"
-#include "gyro_2c.h"
+#include "gyro_2.h"
+#include "styralgoritm.h"
+#include "parkering.h" 
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
