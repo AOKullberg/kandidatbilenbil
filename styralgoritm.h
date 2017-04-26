@@ -9,12 +9,12 @@
 #ifndef STYRALGORITM_H_
 #define STYRALGORITM_H_
 
-extern volatile unsigned char prior_error_right;
-extern volatile unsigned char prior_error_left;
+extern volatile signed char prior_error_right;
+extern volatile signed char prior_error_left;
 
-unsigned char calculate_error(unsigned char desired, unsigned char actual);
-unsigned char derivate(unsigned char error, unsigned char prior_error);
-void pd_steering_control(unsigned char desired_distance, unsigned char actual_distance, unsigned char prior_error, char direction);
+signed char calculate_error(char desired, unsigned char actual);
+signed char derivate(char error, signed char prior_error);
+void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction);
 void cruise_control(unsigned char wanted_velocity);
 void drive_forward_distance(float distance_forward);
 void drive_backwards(unsigned char distance_backwards);

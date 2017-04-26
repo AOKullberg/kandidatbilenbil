@@ -26,20 +26,36 @@ volatile unsigned short motor_speed = 345;
 int reversing = 0;
 
 //Svänger hjulen vänster
-void turn_left(unsigned char data)
+void turn_left(short data)
 {
 	if (OCR1A < 374 )
 	{
-		OCR1A += data;
+		OCR1A = data;
+	}
+	else if (OCR1A < 260)
+	{
+		OCR1A = 260;
+	}
+	else
+	{
+		OCR1A = 374;
 	}
 }
 
 //Svänger hjulen höger
-void turn_right(unsigned char data)
+void turn_right(short data)
 {
 	if (OCR1A > 260 )
 	{
-		OCR1A -= data;
+		OCR1A = data;
+	}
+	else if (OCR1A > 374)
+	{
+		OCR1A = 374;
+	}
+	else
+	{
+		OCR1A = 260;
 	}
 }
 

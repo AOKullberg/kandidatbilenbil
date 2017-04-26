@@ -23,8 +23,8 @@
 #define Kp_stop 1
 #define iteration_time 1
 
-#define desired_distance_right 32	//millimeter
-#define desired_distance_left 32		//millimeter
+#define desired_distance_right 59	//pixlar???
+#define desired_distance_left 59		//pixlar??
 #define stop_value_forward 50
 #define stop_value_backwards 50
 

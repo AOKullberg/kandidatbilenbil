@@ -14,8 +14,8 @@ extern volatile unsigned short steering_degree;
 //Räknare för pwm-signal till motorservo
 extern volatile unsigned short motor_speed;
 
-void turn_left(unsigned char data);
-void turn_right(unsigned char data);
+void turn_left(short data);
+void turn_right(short data);
 void accelerate(unsigned char data); 
 void retardate(unsigned char data);
 void brake(void);

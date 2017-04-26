@@ -21,7 +21,7 @@ void from_garage_to_house(void)
 	_delay_ms(3000);
 	drive_forward_distance(10);
 	turn_90_degrees('F','L');
-	drive_to_stopline();
+	//drive_to_stopline();
 }
 
 void in_from_upside(void)
@@ -55,12 +55,12 @@ void out_from_yard(char direction)
 	from_garage_to_house();
 	if (direction == 'F')
 	{
-		drive_to_stopline();
+		//drive_to_stopline();
 	}
 	else if (direction == 'L')
 	{
 		turn_90_degrees('F','L');
-		drive_to_stopline();
+		//drive_to_stopline();
 	}
 }
 

@@ -17,7 +17,6 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-
 //Senast mottagen data via uart1
 volatile unsigned char uart1_indata = 0x00;
 //Senast mottagen data via SPI
@@ -74,7 +73,7 @@ void blink_led(int nr)
 {
 	DDRC=(1<<nr);
 	PORTC=(1<<nr);
-	_delay_ms(100);
+	_delay_ms(10);
 	PORTC=(0<<nr);
 }
 
@@ -148,12 +147,13 @@ void get_sensor_data(unsigned char data)
 		case 7 :
 		if (data == ack)
 		{
-			//blink_led(6);
+			blink_led(6);
 			counter=0;
 		}
 		else
 		{
-			blink_led(1);
+			//blink_led(6);
+			counter = 0;
 		}
 		break;
 	}
@@ -222,19 +222,35 @@ int main(void)
 		pwm_init();
 		
 		SetUpIMU();
+/*
 		DDRB = 0<<PD3;
 		EIMSK = 1 <<INT2;
-			
+			*/
+
+		_delay_ms(5000);
 		while (1)
-		{
-			
-			if (test_flag == 1)
+		{	
+			if (distance_front > 50)
 			{
-				back_out_from_garage();
-				test_flag = 0;
+				accelerate(1);
+				if (camera_left < 60)
+				{
+					pd_steering_control(desired_distance_left, camera_left, prior_error_left, 'L');
+				}
+				else if (camera_right < 60)
+				{
+					
+					pd_steering_control(desired_distance_right, camera_right, prior_error_right, 'R');
+				}
+	
+				_delay_ms(100);
 			}
-				//skickar bara låga bitarna, dvs max 255 grader	
-			_delay_ms(100);
+			else
+			{
+				brake();
+				_delay_ms(100);
+			}
+			
 		}
 		
 

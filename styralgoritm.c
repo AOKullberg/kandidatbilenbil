@@ -14,37 +14,37 @@
 
 #define Kp_speed 1
 
-volatile unsigned char prior_error_right = 0x00;
-volatile unsigned char prior_error_left = 0x00;
+volatile signed char prior_error_right = 0x00;
+volatile signed char prior_error_left = 0x00;
 
 //extern volatile unsigned char velocity;
 //extern volatile unsigned char distance_forward;
 
-unsigned char calculate_error(unsigned char desired, unsigned char actual)
+signed char calculate_error(char desired, unsigned char actual)
 {
-	unsigned char error = desired - actual;
+	signed char error = desired - actual;
 	return error;
 }
 
-unsigned char derivate(unsigned char error, unsigned char prior_error)
+signed char derivate(char error, signed char prior_error)
 {
-	unsigned char derivative = (error - prior_error)/iteration_time;
+	signed char derivative = (error - prior_error)/iteration_time;
 	return derivative;
 }
 
-void pd_steering_control(unsigned char desired_distance, unsigned char actual_distance, unsigned char prior_error, char direction)
+void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction)
 {
-	unsigned char error = calculate_error(desired_distance, actual_distance);
-	unsigned char derivative = derivate(error, prior_error);
+	signed char error = calculate_error(desired_distance, actual_distance);
+	signed char derivative = derivate(error, prior_error);
 	if(error > 0)
 	{
 		if(direction == 'R')
 		{
-			turn_left(error*Kp+Kd*derivative);
+			turn_left(error*Kp*0.5+320/*+Kd*derivative*/);
 		}
 		else if(direction == 'L')
 		{
-			turn_right(error*Kp+Kd*derivative);
+			turn_right(320-error*Kp*0.5/*Kd*derivative*/);
 		}
 	}
 	prior_error = error;
