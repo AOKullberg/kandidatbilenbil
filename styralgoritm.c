@@ -90,11 +90,11 @@ void drive_forward_distance(float distance_forward)
 			blink_led(6);
 		}
 		else
-		{		
+		{
 		cruise_control(30);
-		//blink_led(3);			
+		//blink_led(3);
 		}
-		distance_travelled += (float)velocity*0.0001; // Måste mäta hur lång tid loopen tar	
+		distance_travelled += (float)velocity*0.0001; // Måste mäta hur lång tid loopen tar
 		OCR1B=motor_speed;
 	}
 	brake(); // får testa och se hur lång bromsstäckan blir
@@ -133,7 +133,7 @@ void drive_for_time(char direction, int time, unsigned char speed)
 			_delay_ms(200);
 			time_passed = time_passed + 1;
 		}
-		brake();	
+		brake();
 	}
 	else
 	{
@@ -143,6 +143,7 @@ void drive_for_time(char direction, int time, unsigned char speed)
 
 void turn_90_degrees(char direction, char direction_turn)
 {
+	Angle = 0;
 	if (direction == 'F')
 	{
 		if(direction_turn == 'R')
@@ -154,7 +155,7 @@ void turn_90_degrees(char direction, char direction_turn)
 				_delay_ms(100);
 				Get_Angle();
 			}
-			
+
 				OCR1A = 320;
 				brake();
 		}
@@ -167,7 +168,7 @@ void turn_90_degrees(char direction, char direction_turn)
 				_delay_ms(100);
 				Get_Angle();
 			}
-			
+
 				OCR1A = 320;
 				brake();
 		}
@@ -183,7 +184,7 @@ void turn_90_degrees(char direction, char direction_turn)
 				_delay_ms(100);
 				Get_Angle();
 			}
-			
+
 				OCR1A = 320;
 				brake();
 		}
@@ -196,7 +197,70 @@ void turn_90_degrees(char direction, char direction_turn)
 				_delay_ms(100);
 				Get_Angle();
 			}
-			
+
+				OCR1A = 320;
+				brake();
+		}
+	}
+}
+
+void turn_x_degrees(char direction, char direction_turn, char degrees)
+{
+	Angle = 0;
+	if (direction == 'F')
+	{
+		if(direction_turn == 'R')
+		{
+			while (Angle > - degrees)
+			{
+				OCR1A = 259;
+				accelerate(3);
+				_delay_ms(100);
+				Get_Angle();
+			}
+
+				OCR1A = 320;
+				brake();
+		}
+		else if (direction_turn == 'L')
+		{
+			while (Angle < degrees)
+			{
+				OCR1A = 373;
+				accelerate(3);
+				_delay_ms(100);
+				Get_Angle();
+			}
+
+				OCR1A = 320;
+				brake();
+		}
+	}
+	else if (direction == 'B')
+	{
+		if(direction_turn == 'R')
+		{
+			while (Angle < degrees)
+			{
+				OCR1A = 259;
+				retardate(3);
+				_delay_ms(100);
+				Get_Angle();
+			}
+
+				OCR1A = 320;
+				brake();
+		}
+		else if (direction_turn == 'L')
+		{
+			while (Angle > -degrees)
+			{
+				OCR1A = 373;
+				retardate(3);
+				_delay_ms(100);
+				Get_Angle();
+			}
+
 				OCR1A = 320;
 				brake();
 		}

@@ -20,6 +20,7 @@ void drive_forward_distance(float distance_forward);
 void drive_backwards(unsigned char distance_backwards);
 void autonomous_driving(void);
 void turn_90_degrees(char,char);
+void turn_x_degrees(char,char,char);
 void drive_for_time(char, int, unsigned char);
 
 
