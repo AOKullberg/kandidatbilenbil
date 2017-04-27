@@ -17,14 +17,14 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define Kp 1	//definiera Kp och Kd
-#define Kd 1
+#define Kp 0.5	//definiera Kp och Kd
+#define Kd 0.2
 #define Kp_speed 1
 #define Kp_stop 1
 #define iteration_time 1
 
-#define desired_distance_right 59	//pixlar???
-#define desired_distance_left 59		//pixlar??
+#define desired_distance_right 50	//pixlar???
+#define desired_distance_left 50		//pixlar??
 #define stop_value_forward 50
 #define stop_value_backwards 50
 
@@ -45,6 +45,7 @@ extern volatile unsigned char velocity;
 extern volatile unsigned char distance_to_line;
 extern volatile unsigned char camera_right;
 extern volatile unsigned char camera_left;
+extern volatile unsigned char camera_front;
 
 
 ///Funktioner///

@@ -8,12 +8,19 @@
 #include "autonom_drive.h"
 #include "main.h"
 #include "styralgoritm.h"
+#include "motorstyrning.h"
 
 void autonomous_driving(void)
 {
-	//drive_forward(distance_forward);
-	pd_steering_control(desired_distance_left, distance_left, prior_error_left, 'L');
-	pd_steering_control(desired_distance_right, distance_right, prior_error_right, 'R');
+		accelerate(1);
+		if(camera_left < camera_right)
+		{
+			one_line_control(desired_distance_left, camera_left, prior_error_left, 'L');
+		}
+		else if(camera_right < camera_left)
+		{
+			one_line_control(desired_distance_right, camera_right, prior_error_right, 'R');
+		}
 }
 
 void korsning(void)

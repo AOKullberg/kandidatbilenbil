@@ -28,13 +28,13 @@ int reversing = 0;
 //Svänger hjulen vänster
 void turn_left(short data)
 {
-	if (OCR1A < 374 )
-	{
-		OCR1A = data;
-	}
-	else if (OCR1A < 260)
+	if (OCR1A < 260 )
 	{
 		OCR1A = 260;
+	}
+	else if (OCR1A < 374)
+	{
+		OCR1A = data;
 	}
 	else
 	{
@@ -45,17 +45,33 @@ void turn_left(short data)
 //Svänger hjulen höger
 void turn_right(short data)
 {
-	if (OCR1A > 260 )
-	{
-		OCR1A = data;
-	}
-	else if (OCR1A > 374)
+	if (OCR1A > 374 )
 	{
 		OCR1A = 374;
+	}
+	else if (OCR1A > 260)
+	{
+		OCR1A = data;
 	}
 	else
 	{
 		OCR1A = 260;
+	}
+}
+
+void turn_both_directions(short data)
+{
+	if (OCR1A > 374)
+	{
+		OCR1A = 374;
+	}
+	else if (OCR1A < 260)
+	{
+		OCR1A = 260;
+	}
+	else
+	{
+		OCR1A = data;
 	}
 }
 

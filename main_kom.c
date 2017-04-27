@@ -27,6 +27,7 @@ volatile unsigned char distance_right = 0x00;
 volatile unsigned char distance_left = 0x00;
 volatile unsigned char camera_right = 0x00;
 volatile unsigned char camera_left = 0x00;
+volatile unsigned char camera_front = 0x00;
 unsigned char ack = 0x61;
 int counter = 0;
 
@@ -108,35 +109,41 @@ void get_sensor_data(unsigned char data)
 		
 		case 2 :
 		distance_back=data;
-		//transmit_uart0(data);
+		transmit_uart0(data);
 		++counter;
 		break;
 		
 		case 3 :
 		distance_right=data;
-		//transmit_uart0(data);
+		transmit_uart0(data);
 		++counter;
 		break;
 		
 		case 4 :
 		distance_left = data;
-		//transmit_uart0(data);
+		transmit_uart0(data);
 		++counter;
 		break;
 		
 		case 5 :
 		camera_right = data;
-		//transmit_uart0(data);
+		transmit_uart0(data);
 		++counter;
 		break;	
 		
 		case 6 :
 		camera_left = data;
-		//transmit_uart0(data);
+		transmit_uart0(data);
+		++counter;
+		break;
+		
+		case 7 :
+		camera_front = data;
+		transmit_uart0(data);
 		++counter;
 		break;	
 		
-		case 7 :
+		case 8 :
 		if (data == ack)
 		{
 			blink_led(6);
@@ -145,7 +152,8 @@ void get_sensor_data(unsigned char data)
 		}
 		else
 		{
-			blink_led(1);
+			//blink_led(6);
+			counter=0;
 		}
 		break;
 	}
@@ -158,6 +166,7 @@ void get_sensor_data(unsigned char data)
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
+	transmit_uart0(spi_indata);
 }
 
 ISR(USART0_RX_vect)

@@ -17,9 +17,6 @@
 volatile signed char prior_error_right = 0x00;
 volatile signed char prior_error_left = 0x00;
 
-//extern volatile unsigned char velocity;
-//extern volatile unsigned char distance_forward;
-
 signed char calculate_error(char desired, unsigned char actual)
 {
 	signed char error = desired - actual;
@@ -40,14 +37,37 @@ void pd_steering_control(char desired_distance, unsigned char actual_distance, s
 	{
 		if(direction == 'R')
 		{
-			turn_left(error*Kp*0.5+320/*+Kd*derivative*/);
+			turn_left(error*Kp+320+Kd*derivative);
 		}
 		else if(direction == 'L')
 		{
-			turn_right(320-error*Kp*0.5/*Kd*derivative*/);
+			turn_right(320-error*Kp-Kd*derivative);
 		}
+		prior_error = error;
 	}
-	prior_error = error;
+	else
+	{
+		//OCR1A = 320;
+		prior_error = 0;
+	}
+}
+
+void one_line_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char side_of_road)
+{
+	signed char error = calculate_error(desired_distance, actual_distance);
+	//signed char derivative = derivate(error, prior_error);
+	if(side_of_road == 'R')
+	{
+		turn_both_directions(error*Kp+320/*+Kd*derivative*/);
+		prior_error_left = 0;
+	}
+	else if(side_of_road == 'L')
+	{
+		turn_both_directions(320-(error*Kp/*+Kd*derivative*/));
+		prior_error_right = 0;
+	}
+		prior_error = error;
+
 }
 
 
@@ -87,7 +107,7 @@ void drive_forward_distance(float distance_forward)
 		if (distance_front < 30 )
 		{
 			brake();
-			blink_led(6);
+			//blink_led(6);
 		}
 		else
 		{
@@ -137,7 +157,7 @@ void drive_for_time(char direction, int time, unsigned char speed)
 	}
 	else
 	{
-		blink_led(6);
+		//blink_led(6);
 	}
 }
 
@@ -148,7 +168,7 @@ void turn_90_degrees(char direction, char direction_turn)
 	{
 		if(direction_turn == 'R')
 		{
-			while (Angle > -80)
+			while (Angle > -85)
 			{
 				OCR1A = 259;
 				accelerate(3);
@@ -161,7 +181,7 @@ void turn_90_degrees(char direction, char direction_turn)
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle < 80)
+			while (Angle < 85)
 			{
 				OCR1A = 373;
 				accelerate(3);
@@ -177,7 +197,7 @@ void turn_90_degrees(char direction, char direction_turn)
 	{
 		if(direction_turn == 'R')
 		{
-			while (Angle < 80)
+			while (Angle < 85)
 			{
 				OCR1A = 259;
 				retardate(3);
@@ -190,7 +210,7 @@ void turn_90_degrees(char direction, char direction_turn)
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle > -80)
+			while (Angle > -85)
 			{
 				OCR1A = 373;
 				retardate(3);
@@ -214,7 +234,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 			while (Angle > - degrees)
 			{
 				OCR1A = 259;
-				accelerate(3);
+				accelerate(1);
 				_delay_ms(100);
 				Get_Angle();
 			}
@@ -227,7 +247,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 			while (Angle < degrees)
 			{
 				OCR1A = 373;
-				accelerate(3);
+				accelerate(1);
 				_delay_ms(100);
 				Get_Angle();
 			}
@@ -266,3 +286,16 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 		}
 	}
 }
+
+void drive_to_stopline(void)
+{
+	if (camera_front > 10)
+	{
+		accelerate(1);
+	}
+	else
+	{
+		brake();	
+	}
+} 
+

@@ -36,6 +36,7 @@ volatile unsigned char distance_right = 0x00;
 volatile unsigned char distance_left = 0x00;
 volatile unsigned char camera_right = 0x00;
 volatile unsigned char camera_left = 0x00;
+volatile unsigned char camera_front = 0x00;
 unsigned char ack = 0x61;
 
 /*
@@ -145,6 +146,11 @@ void get_sensor_data(unsigned char data)
 		break;
 		
 		case 7 :
+		camera_front = data;
+		++counter;
+		break;
+		
+		case 8 :
 		if (data == ack)
 		{
 			blink_led(6);
@@ -208,7 +214,7 @@ void autonomous_command(unsigned char newcommand)
 //används för att testa motorstyrningen
 ISR(INT2_vect)
 {
- test_flag = 1;
+	test_flag = 1;
 }
 
 
@@ -222,15 +228,29 @@ int main(void)
 		pwm_init();
 		
 		SetUpIMU();
-/*
-		DDRB = 0<<PD3;
-		EIMSK = 1 <<INT2;
-			*/
 
-		_delay_ms(5000);
-		while (1)
-		{	
-			if (distance_front > 50)
+
+		/*DDRB = 0<<PD3;
+		EIMSK = 1 <<INT2;*/
+		_delay_ms(5000);			
+		//turn_90_degrees('F','R');
+		/*if (test_flag == 1)
+		{*/
+			while (1)
+			{
+				if(camera_front > 20)
+				{
+					autonomous_driving();					
+				}
+				else
+				{
+					brake();
+					//satta flagga
+				}
+			}
+		//}
+			//pd_steering_control(desired_distance_right, distance_front, prior_error_right, 'R');		
+			/*if (distance_front > 50)
 			{
 				accelerate(1);
 				if (camera_left < 60)
@@ -249,9 +269,9 @@ int main(void)
 			{
 				brake();
 				_delay_ms(100);
-			}
+			}*/
 			
-		}
+		
 		
 
 }
