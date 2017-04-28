@@ -10,7 +10,7 @@
 
 void parkeringsficka(void)
 {
-  break();
+  brake();
   _delay_ms(100);
   turn_x_degrees('F','R',45);
   turn_x_degrees('F','L',45);

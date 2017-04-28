@@ -55,19 +55,18 @@ void pd_steering_control(char desired_distance, unsigned char actual_distance, s
 void one_line_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char side_of_road)
 {
 	signed char error = calculate_error(desired_distance, actual_distance);
-	//signed char derivative = derivate(error, prior_error);
+	signed char derivative = derivate(error, prior_error);
 	if(side_of_road == 'R')
 	{
-		turn_both_directions(error*Kp+320/*+Kd*derivative*/);
+		turn_both_directions(error*Kp+320+Kd*derivative);
 		prior_error_left = 0;
 	}
 	else if(side_of_road == 'L')
 	{
-		turn_both_directions(320-(error*Kp/*+Kd*derivative*/));
+		turn_both_directions(320-(error*Kp+Kd*derivative));
 		prior_error_right = 0;
 	}
 		prior_error = error;
-
 }
 
 
@@ -111,11 +110,12 @@ void drive_forward_distance(float distance_forward)
 		}
 		else
 		{
-		cruise_control(30);
+		accelerate(1);
 		//blink_led(3);
 		}
-		distance_travelled += (float)velocity*0.0001; // Måste mäta hur lång tid loopen tar
+		distance_travelled += (float)velocity*0.1; // Måste mäta hur lång tid loopen tar
 		OCR1B=motor_speed;
+		_delay_ms(100);
 	}
 	brake(); // får testa och se hur lång bromsstäckan blir
 	OCR1B=motor_speed;
@@ -263,7 +263,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 			while (Angle < degrees)
 			{
 				OCR1A = 259;
-				retardate(3);
+				retardate(1);
 				_delay_ms(100);
 				Get_Angle();
 			}
@@ -276,7 +276,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 			while (Angle > -degrees)
 			{
 				OCR1A = 373;
-				retardate(3);
+				retardate(1);
 				_delay_ms(100);
 				Get_Angle();
 			}
@@ -289,13 +289,14 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 
 void drive_to_stopline(void)
 {
-	if (camera_front > 10)
+	while (camera_front > 25)
 	{
 		accelerate(1);
 	}
-	else
+	while (velocity > 0)
 	{
-		brake();	
+		OCR1B = 326;
 	}
+		brake();
 } 
 

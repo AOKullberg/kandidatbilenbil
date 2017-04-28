@@ -17,9 +17,9 @@
 
 void from_garage_to_house(void)
 {
-	turn_x_degrees('B','R', 60);
+	turn_x_degrees('B','R', 50);
 	_delay_ms(3000);
-	drive_for_time('F',2,1);
+	drive_forward_distance(1);
 	turn_x_degrees('F','L',110);
 	drive_to_stopline();
 }

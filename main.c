@@ -76,6 +76,7 @@ void blink_led(int nr)
 	PORTC=(1<<nr);
 	_delay_ms(10);
 	PORTC=(0<<nr);
+	_delay_ms(10);
 }
 
 //Skicka data �ver uart1
@@ -98,6 +99,7 @@ void transmit_spi(unsigned char data)
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
+	transmit_spi(spi_indata);
 }
 
 //Avbrottsrutin d� ny data mottagits via UART
@@ -153,12 +155,13 @@ void get_sensor_data(unsigned char data)
 		case 8 :
 		if (data == ack)
 		{
-			blink_led(6);
+			_delay_ms(20);
+			//blink_led(6);
 			counter=0;
 		}
 		else
 		{
-			//blink_led(6);
+			blink_led(7);
 			counter = 0;
 		}
 		break;
@@ -193,9 +196,18 @@ void autonomous_command(unsigned char newcommand)
 	{
 
 	}
-	if ((newcommand & 0xa0) == 0xa0)	//V�gf�ljning
+	if (newcommand == 0x0a)	//V�gf�ljning
 	{
-		autonomous_driving();
+		//blink_led(6);
+		if(camera_front > 20)
+		{
+			autonomous_driving();
+		}
+		else
+		{
+			brake();
+			//satta flagga
+		}
 	}
 	if ((newcommand & 0xb0) == 0xb0)	//korsning
 	{
@@ -208,6 +220,10 @@ void autonomous_command(unsigned char newcommand)
 	if ((newcommand & 0x0d) == 0xd0)	//parkering
 	{
 
+	}
+	if (newcommand==0x00)
+	{
+		brake();
 	}
 }
 
@@ -232,22 +248,31 @@ int main(void)
 
 		/*DDRB = 0<<PD3;
 		EIMSK = 1 <<INT2;*/
-		_delay_ms(5000);			
+		_delay_ms(5000);
+		
+		from_garage_to_house();			
 		//turn_90_degrees('F','R');
 		/*if (test_flag == 1)
 		{*/
-			while (1)
-			{
-				if(camera_front > 20)
+			/*	if (spi_indata == 0x0a)
 				{
-					autonomous_driving();					
+					//blink_led(6);
+					if(camera_front > 20)
+					{
+						autonomous_driving();
+					}
+					else
+					{
+						brake();
+						//satta flagga
+					}
 				}
 				else
 				{
 					brake();
-					//satta flagga
-				}
-			}
+					blink_led(6);
+				}*/
+
 		//}
 			//pd_steering_control(desired_distance_right, distance_front, prior_error_right, 'R');		
 			/*if (distance_front > 50)

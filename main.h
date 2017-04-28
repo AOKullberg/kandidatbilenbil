@@ -17,7 +17,7 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define Kp 0.5	//definiera Kp och Kd
+#define Kp 0.15	//definiera Kp och Kd
 #define Kd 0.2
 #define Kp_speed 1
 #define Kp_stop 1
