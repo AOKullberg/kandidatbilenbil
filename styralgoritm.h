@@ -16,6 +16,7 @@ signed char calculate_error(char desired, unsigned char actual);
 signed char derivate(char error, signed char prior_error);
 void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction);
 void one_line_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction);
+void two_line_control(void);
 void cruise_control(unsigned char wanted_velocity);
 void drive_forward_distance(float distance_forward);
 void drive_backwards(unsigned char distance_backwards);

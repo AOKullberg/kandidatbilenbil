@@ -17,6 +17,8 @@
 volatile signed char prior_error_right = 0x00;
 volatile signed char prior_error_left = 0x00;
 
+volatile short prior_placement = 0;
+
 signed char calculate_error(char desired, unsigned char actual)
 {
 	signed char error = desired - actual;
@@ -69,7 +71,13 @@ void one_line_control(char desired_distance, unsigned char actual_distance, sign
 		prior_error = error;
 }
 
-
+void two_line_control(void)
+{
+	short placement = camera_left - camera_right;
+	short derivative = derivate(placement, prior_placement);
+	turn_both_directions(317+Kp*placement+Kd*derivative);
+	prior_placement = placement;
+}
 
 void cruise_control(unsigned char wanted_velocity)
 {

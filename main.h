@@ -17,11 +17,11 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define Kp 0.15	//definiera Kp och Kd
+#define Kp 0.6	//definiera Kp och Kd
 #define Kd 0.2
 #define Kp_speed 1
 #define Kp_stop 1
-#define iteration_time 1
+#define iteration_time 0.01
 
 #define desired_distance_right 50	//pixlar???
 #define desired_distance_left 50		//pixlar??

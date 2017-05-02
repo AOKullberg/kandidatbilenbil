@@ -156,7 +156,7 @@ void get_sensor_data(unsigned char data)
 		if (data == ack)
 		{
 			_delay_ms(20);
-			//blink_led(6);
+			blink_led(6);
 			counter=0;
 		}
 		else
@@ -250,7 +250,21 @@ int main(void)
 		EIMSK = 1 <<INT2;*/
 		_delay_ms(5000);
 		
-		from_garage_to_house();			
+		/*while (1)
+		{
+			OCR2A=22;
+			_delay_ms(1000);
+			OCR2A=16;
+			_delay_ms(1000);
+		}
+		*/
+		
+		while(1)
+		{
+			autonomous_driving();
+			_delay_ms(10);
+		}
+		brake();
 		//turn_90_degrees('F','R');
 		/*if (test_flag == 1)
 		{*/

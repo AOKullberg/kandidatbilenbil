@@ -17,9 +17,12 @@ void pwm_init(void)
 	DDRD|=(1<<PD7)|(1<<PD5)|(1<<PD4); //Makes PORTD as Output
 	TCCR1A|=(1<<WGM11)|(1<<COM1A1)|(1<<COM1B1);
 	TCCR1B|=(1<<WGM12)|(1<<WGM13)|(1<<CS11)|(1<<CS10);
+	TCCR2A|=(1<<WGM21)|(1<<COM2A1)|(1<<WGM20);
+	TCCR2B|=(1<<CS22)|(1<<CS21)|(1<<CS20);
 	ICR1 = 4607;
 	OCR1A = 320;
 	OCR1B = 340;
+	OCR2A = 19;
 }
 
 //Initialisera UART
