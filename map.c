@@ -4,8 +4,9 @@
  * Created: 2017-04-27 11:35:09
  *  Author: Tobias Fridén
  */ 
-#include "dijkstra.h"
+#include "dijsktra.h"
 #include "sendrecieve.h"
+#include "led_kom.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -21,6 +22,7 @@ int** roadmap; //N x N-matris som innehåller vilken nod som ansluter nod i till
 int* route;//1 x N-vektor som innehåller den senast beräknade snabbaste vägen från där rutten beräknades. Målnoden ligger först i vektorn.
 int current;//Anger på vilket element i route-vektorn som bilen befinner sig
 int dist_to_next;//Avstånd till nästa nod
+int destination;
 
 /* FUNCTION get_no_nodes()
 * Tar emot ett nytt antal noder från datorn
@@ -33,6 +35,14 @@ void get_no_nodes(void)
 	sei();
 }
 
+void get_destination(void)
+{
+	cli();
+	while ( !(UCSR0A & (1<<RXC0)) );
+	destination = UDR0;
+	sei();		
+}
+
 /* FUNCTION init_maps()
 * allokerar minne för de matriser som innehåller information om nodkartan
 */
@@ -40,10 +50,10 @@ void init_maps(void)
 {
 	int i;
 
-	roadmap = malloc(no_nodes * sizeof *distancemap);
+	distancemap = malloc(no_nodes * sizeof *distancemap);
 	for (i=0;i<no_nodes;i++)
 	{
-		roadmap[i]=malloc(no_nodes * sizeof *distancemap[i]);
+		distancemap[i]=malloc(no_nodes * sizeof *distancemap[i]);
 	}
 	
 	roadmap = malloc(no_nodes * sizeof *roadmap);
@@ -76,7 +86,6 @@ void clear_maps(void)
 	free(distancemap);
 	
 	free(route);
-	
 }
 /* FUNCTION update_distancemap()
 * tar emot en ny matris från datorn med information om avstånd mellan
@@ -86,24 +95,23 @@ void update_distancemap(void)
 {
 	int i = 0;
 	int j = 0;
-	int temp = 0;
 
 	cli();
 	
-	for (i=0;i<no_nodes;i++)
-	for (j=0;j<no_nodes;j++)
-	distancemap[i][j]=99;
+	for (i=0; i<no_nodes; i++)
+	for (j=0; j<no_nodes; j++)
+	distancemap[i][j] = 3;
 	
-	for (i=0;i<no_nodes;i++)
+	for (i=0; i<no_nodes; i++)
 	{
-		for (j=i+1;j<no_nodes;j++)
+		for (j=0;j<no_nodes;j++)
 		{
 			while ( !(UCSR0A & (1<<RXC0)) );
-			temp=UDR0;
-			distancemap[i][j]=temp;
-			distancemap[j][i]=temp;
+			distancemap[i][j]=UDR0;
 		}
 	}
+	
+	
 	sei();
 }
 
@@ -117,7 +125,7 @@ void update_roadmap(void)
 	int j = 0;
 	cli();
 	
-	for (i=0;i<no_nodes;i++)
+	for (i=0; i<no_nodes; i++)
 	{
 		for (j=0;j<no_nodes;j++)
 		{
@@ -154,8 +162,21 @@ void check_map(int ** currentmap )
 */
 void new_route(int destination)
 {
+	int current_node=3;
+	for (int i=0; i<no_nodes; i++)
+	{
+		route[i]=0;
+	}
+			
+	dijsktra(distancemap,current_node-1,destination-1);
 	
-	dijsktra(distancemap,route[current],destination);
+	show_number(2);
+	
+	for(int i=0; i<no_nodes; i++)
+	{
+		transmit_uart0(route[i]);
+	}
+	transmit_uart0(current);
 }
 
 /* FUNCTION next_node()

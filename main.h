@@ -12,7 +12,6 @@
 
 #define F_CPU 14745600UL
 
-void blink_led(int nr);
 void manual_main(void);
 void autonom_main(void);
 void prog_main(void);

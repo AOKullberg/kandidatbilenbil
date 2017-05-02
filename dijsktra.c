@@ -61,7 +61,11 @@ void dijsktra(int **cost,int source,int target)
 	j = 0;
 	while(start != -1)
 	{
-		route[j++] = start;
+		route[j++] = start+1;
 		start = prev[start];
 	}
+	current = j-1;
+	free(dist);
+	free(prev);
+	free(selected);
 }

@@ -11,6 +11,7 @@
 #include "main.h"
 #include "sendrecieve.h"
 #include "map.h"
+#include "led_kom.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -70,11 +71,14 @@ void prog_main(void)
 {
 	clear_maps();
 	get_no_nodes();
+	transmit_uart0(no_nodes);
 	init_maps();
 	update_distancemap();
-	update_roadmap();
 	check_map(distancemap);
-	check_map(roadmap);
+	//update_roadmap();
+	//check_map(roadmap);
+	get_destination();
+	new_route(destination);
 }
 
 
@@ -85,11 +89,12 @@ int main(void)
 	sei();
 	uart_init();
 	spi_init();
+	show_number(1);
 
 	
     while (1) 
     {
-		send_data();
+		//send_data();
 		switch(mode)
 		{
 			case 0 :

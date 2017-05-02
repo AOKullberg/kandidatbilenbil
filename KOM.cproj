@@ -154,6 +154,12 @@
     <Compile Include="dijsktra.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="led_kom.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="led_kom.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.h">
       <SubType>compile</SubType>
     </Compile>

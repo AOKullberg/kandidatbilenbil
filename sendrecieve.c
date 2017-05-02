@@ -7,6 +7,7 @@
 
 #include "sendrecieve.h"
 #include "main.h"
+#include "led_kom.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -165,13 +166,12 @@ void get_sensor_data(unsigned char data)
 		case 7 :
 		if (data == ack)
 		{
-			blink_led(6);
-			transmit_uart0(data);
+			blink_led(2,10);
 			counter=0;
 		}
 		else
 		{
-			blink_led(1);
+			blink_led(1,10);
 		}
 		break;
 	}

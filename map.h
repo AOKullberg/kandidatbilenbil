@@ -17,11 +17,13 @@ extern int **roadmap;
 extern int *route;
 extern int current;
 extern int dist_to_next;
+extern int destination;
 
 
 void init_maps(void);
 void clear_maps(void);
 void get_no_nodes(void);
+void get_destination(void);
 void update_distancemap(void);
 void update_roadmap(void);
 void check_map(int** currentmap );
