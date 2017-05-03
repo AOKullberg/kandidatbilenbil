@@ -15,6 +15,8 @@
 
 volatile float Angle = 0;
 
+volatile int time_calc_angle = 0;
+
 #define AngularVelocitySlaveAddress 0xD6	//address to gyro
 #define AngularVelocity_WHO_AM_I_Register 0x0F  // Identifikationsregister för gyrot
 #define AngularVelocity_WHO_AM_I_RegisterDefault 0xD7 //defaultvärde
@@ -160,8 +162,15 @@ float ConvertToAngles(uint16_t Data)
 	return Angle;
 }
 
+ISR(TIMER0_OVF_vect)
+{
+	time_calc_angle++;		//ett varde på ca 500 bör betyda en tid i storleksordningen 10 ms
+}
+
 void Get_Angle()
 {
+	TCNT0 = 0;
+	time_calc_angle = 0;
 	uint8_t HighData;
 	uint8_t LowData;
 	GetI2CData(AngularVelocitySlaveAddress, AngularVelocity_OUT_Z_L_Register, &LowData);	//Hämta låg och hög databyte

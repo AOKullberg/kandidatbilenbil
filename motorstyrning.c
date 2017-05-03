@@ -64,14 +64,28 @@ void turn_both_directions(short data)
 	if (OCR1A > 374)
 	{
 		OCR1A = 374;
+		transmit_spi(0x56);
 	}
 	else if (OCR1A < 260)
 	{
 		OCR1A = 260;
+		transmit_spi(0x48);
 	}
 	else
 	{
 		OCR1A = data;
+		if(data > 340)
+		{
+			transmit_spi(0x56);
+		}
+		else if(data < 300)
+		{
+			transmit_spi(0x48);
+		}
+		else
+		{
+			transmit_spi(0x00);
+		}
 	}
 }
 
@@ -106,7 +120,7 @@ void accelerate(unsigned char data)
 		break;
 	}
 	OCR1B = motor_speed;
-
+	transmit_spi(0x41);
 }
 
 //void turn_camera
@@ -151,6 +165,7 @@ void retardate(unsigned char data)
 			OCR1B = 322;
 			break;			
 		}
+		transmit_spi(0x52);
 	}
 
 
@@ -158,4 +173,5 @@ void retardate(unsigned char data)
 void brake(void)
 {
 	OCR1B=345;
+	transmit_spi(0x53);
 }

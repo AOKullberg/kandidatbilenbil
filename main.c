@@ -188,15 +188,23 @@ void execute_command(unsigned char newcommand)
 
 void autonomous_command(unsigned char newcommand)
 {
-	if ((newcommand & 0x80) == 0x80)	//Utfart g�rdsplan
+	if ((newcommand & 0x80) == 0x80)		//Utfart g�rdsplan rakt
 	{
 
 	}
-	if ((newcommand & 0x90) == 0x90)	//Infart g�rdsplan
+	if ((newcommand & 0x90) == 0x90)		//utfart gardsplan svang
+	{
+		
+	}
+	if ((newcommand & 0xa0) == 0xa0)		//infart gardsplan rakt
+	{
+		
+	}
+	if ((newcommand & 0xb0) == 0xb0)		//Infart g�rdsplan svang
 	{
 
 	}
-	if (newcommand == 0x0a)	//V�gf�ljning
+	if ((newcommand & 0xc0) == 0xc0)		//V�gf�ljning
 	{
 		//blink_led(6);
 		if(camera_front > 20)
@@ -209,21 +217,29 @@ void autonomous_command(unsigned char newcommand)
 			//satta flagga
 		}
 	}
-	if ((newcommand & 0xb0) == 0xb0)	//korsning
+	if ((newcommand & 0xd0) == 0xd0)	//korsning vanster
 	{
 
 	}
-	if ((newcommand & 0xc0) == 0xc0)	//parkeringsficka
+	if ((newcommand & 0xe0) == 0xe0)	//korsning hoger
 	{
 
 	}
-	if ((newcommand & 0x0d) == 0xd0)	//parkering
+	if ((newcommand & 0xf0) == 0xf0)	//parkering 1
 	{
 
 	}
-	if (newcommand==0x00)
+	if ((newcommand & 0x81) == 0x81)	//parkering 2
 	{
-		brake();
+		
+	}
+	if ((newcommand & 0x91) == 0x91)	//parkering 3
+	{
+		
+	}
+	if ((newcommand & 0xa1) == 0xa1)	//parkeringsficka
+	{
+		
 	}
 }
 
@@ -261,8 +277,8 @@ int main(void)
 		
 		while(1)
 		{
-			autonomous_driving();
-			_delay_ms(10);
+			
+			execute_command(spi_indata);
 		}
 		brake();
 		//turn_90_degrees('F','R');
