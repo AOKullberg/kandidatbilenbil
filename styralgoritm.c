@@ -148,7 +148,7 @@ void drive_for_time(char direction, int time, unsigned char speed)
 		while(time >= time_passed)
 		{
 			accelerate(speed);
-			_delay_ms(200);
+			_delay_ms(1);
 			time_passed = time_passed + 1;
 		}
 		brake();
@@ -158,7 +158,7 @@ void drive_for_time(char direction, int time, unsigned char speed)
 		while(time >= time_passed)
 		{
 			retardate(speed);
-			_delay_ms(200);
+			_delay_ms(1);
 			time_passed = time_passed + 1;
 		}
 		brake();
@@ -176,11 +176,12 @@ void turn_90_degrees(char direction, char direction_turn)
 	{
 		if(direction_turn == 'R')
 		{
-			while (Angle > -85)
+			while (Angle > -80)
 			{
+				time_calc_angle = 0;
+				TCNT0 = 0;
 				OCR1A = 259;
 				accelerate(3);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
@@ -189,11 +190,12 @@ void turn_90_degrees(char direction, char direction_turn)
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle < 85)
+			while (Angle < 80)
 			{
+				time_calc_angle = 0;
+				TCNT0 = 0;
 				OCR1A = 373;
 				accelerate(3);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
@@ -207,9 +209,10 @@ void turn_90_degrees(char direction, char direction_turn)
 		{
 			while (Angle < 85)
 			{
+				time_calc_angle = 0;
+				TCNT0 = 0;				
 				OCR1A = 259;
 				retardate(3);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
@@ -220,9 +223,10 @@ void turn_90_degrees(char direction, char direction_turn)
 		{
 			while (Angle > -85)
 			{
+				time_calc_angle = 0;
+				TCNT0 = 0;				
 				OCR1A = 373;
 				retardate(3);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
@@ -297,14 +301,15 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 
 void drive_to_stopline(void)
 {
-	while (camera_front > 25)
+	while (camera_front > 32)
 	{
-		accelerate(1);
+		accelerate(4);
 	}
-	while (velocity > 0)
-	{
-		OCR1B = 326;
-	}
+	//while (velocity > 0)
+	//{
+	//	OCR1B = 326;
+	//}
+		drive_for_time('F', 300, 4);
 		brake();
 } 
 

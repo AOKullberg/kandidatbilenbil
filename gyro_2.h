@@ -22,6 +22,8 @@
 
 extern volatile float Angle;
 
+extern volatile unsigned char time_calc_angle;
+
 void I2C_INT();
 uint8_t SetUpIMU();
 uint8_t SendI2CData(uint8_t SlaveAddress, uint8_t Register, uint8_t Data);

@@ -225,19 +225,23 @@ void autonomous_command(unsigned char newcommand)
 	{
 
 	}
-	if ((newcommand & 0xf0) == 0xf0)	//parkering 1
+	if ((newcommand & 0xf0) == 0xf0)	//korsning rakt
 	{
 
 	}
-	if ((newcommand & 0x81) == 0x81)	//parkering 2
+	if ((newcommand & 0x82) == 0x82)	//parkering 1
 	{
 		
 	}
-	if ((newcommand & 0x91) == 0x91)	//parkering 3
+	if ((newcommand & 0x92) == 0x92)	//parkering 2
 	{
 		
 	}
-	if ((newcommand & 0xa1) == 0xa1)	//parkeringsficka
+	if ((newcommand & 0xa2) == 0xa2)	//parkering 3
+	{
+		
+	}
+	if ((newcommand & 0xb2) == 0xb2)	//parkeringsficka
 	{
 		
 	}
@@ -264,7 +268,7 @@ int main(void)
 
 		/*DDRB = 0<<PD3;
 		EIMSK = 1 <<INT2;*/
-		_delay_ms(5000);
+		//_delay_ms(5000);
 		
 		/*while (1)
 		{
@@ -274,13 +278,15 @@ int main(void)
 			_delay_ms(1000);
 		}
 		*/
-		
-		while(1)
+		OCR1B = 345; 
+		_delay_ms(3000);
+		while(distance_front > 15)
 		{
-			
-			execute_command(spi_indata);
+			autonomous_driving();
 		}
-		brake();
+		drive_to_stopline();
+		//turn_90_degrees('F', 'R');
+		//turn_90_degrees('F', 'L');
 		//turn_90_degrees('F','R');
 		/*if (test_flag == 1)
 		{*/
