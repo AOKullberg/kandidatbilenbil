@@ -28,63 +28,63 @@ int reversing = 0;
 //Svänger hjulen vänster
 void turn_left(short data)
 {
-	if (OCR1A < 260 )
+	if (data < 262 )
 	{
-		OCR1A = 260;
+		OCR1A = 262;
 	}
-	else if (OCR1A < 374)
+	else if (data < 382)
 	{
 		OCR1A = data;
 	}
 	else
 	{
-		OCR1A = 374;
+		OCR1A = 382;
 	}
 }
 
 //Svänger hjulen höger
 void turn_right(short data)
 {
-	if (OCR1A > 374 )
+	if (data > 382 )
 	{
-		OCR1A = 374;
+		OCR1A = 382;
 	}
-	else if (OCR1A > 260)
+	else if (data > 262)
 	{
 		OCR1A = data;
 	}
 	else
 	{
-		OCR1A = 260;
+		OCR1A = 262;
 	}
 }
 
 void turn_both_directions(short data)
 {
-	if (OCR1A > 374)
+	if (data > 382*8)
 	{
-		OCR1A = 374;
-		transmit_spi(0x56);
+		OCR1A = 382*8;
+		//transmit_spi(0x56);
 	}
-	else if (OCR1A < 260)
+	else if (data < 240*8)
 	{
-		OCR1A = 260;
-		transmit_spi(0x48);
+		OCR1A = 240*8;
+		//transmit_spi(0x48);
 	}
 	else
 	{
 		OCR1A = data;
 		if(data > 340)
 		{
-			transmit_spi(0x56);
+			//transmit_spi(0x56);
 		}
 		else if(data < 300)
 		{
-			transmit_spi(0x48);
+			//transmit_spi(0x48);
 		}
 		else
 		{
-			transmit_spi(0x00);
+			//transmit_spi(0x00);
 		}
 	}
 }
@@ -96,7 +96,7 @@ void accelerate(unsigned char data)
 	switch (data)
 	{
 		case 1:
-		motor_speed = 353;  //ungefär 30cm/s min hastighet
+		motor_speed = 2825;  //ungefär 30cm/s min hastighet
 		break;
 
 		case 2:
@@ -120,7 +120,7 @@ void accelerate(unsigned char data)
 		break;
 	}
 	OCR1B = motor_speed;
-	transmit_spi(0x41);
+	//transmit_spi(0x41);
 }
 
 //void turn_camera
@@ -165,13 +165,13 @@ void retardate(unsigned char data)
 			OCR1B = 322;
 			break;			
 		}
-		transmit_spi(0x52);
+		//transmit_spi(0x52);
 	}
 
 
 
 void brake(void)
 {
-	OCR1B=345;
-	transmit_spi(0x53);
+	OCR1B=8*345;
+	//transmit_spi(0x53);
 }

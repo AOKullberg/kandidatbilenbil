@@ -95,11 +95,18 @@ void transmit_spi(unsigned char data)
 	SPDR = data;
 }
 
+unsigned char spi_tranciever(unsigned char data)
+{
+	SPDR = data;
+	while(!(SPSR & (1 << SPIF)));
+	return (SPDR);
+}
+
 //Avbrottsrutin d� ny data mottagits via SPI
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
-	transmit_spi(spi_indata);
+	transmit_spi(executed_command);
 }
 
 //Avbrottsrutin d� ny data mottagits via UART
@@ -156,12 +163,12 @@ void get_sensor_data(unsigned char data)
 		if (data == ack)
 		{
 			_delay_ms(20);
-			blink_led(6);
+			//blink_led(6);
 			counter=0;
 		}
 		else
 		{
-			blink_led(7);
+			//blink_led(7);
 			counter = 0;
 		}
 		break;
@@ -204,23 +211,33 @@ void autonomous_command(unsigned char newcommand)
 	{
 
 	}
-	if ((newcommand & 0xc0) == 0xc0)		//V�gf�ljning
+	if (newcommand == 0xc0)		//V�gf�ljning
 	{
-		//blink_led(6);
-		if(camera_front > 20)
+		//blink_led(7);
+		if(((distance_front > 15) || (distance_front == 1))&&((camera_front > 35)||(camera_front==0)))
 		{
 			autonomous_driving();
+			//executed_command=0xc0;
 		}
 		else
 		{
-			brake();
-			//satta flagga
+			blink_led(6);
+			drive_to_stopline();
+			//while (spi_indata==0xc0)
+			//{
+				executed_command=0xf0;
+			//}
+		//satta flagga
 		}
 	}
-	if ((newcommand & 0xd0) == 0xd0)	//korsning vanster
+	if (newcommand == 0xd0)	//korsning vanster
 	{
-
-	}
+		blink_led(7);
+		_delay_ms(1000);
+		drive_for_time('F',1200,1);
+		turn_90_degrees('F','L');
+		executed_command=0xff;
+}
 	if ((newcommand & 0xe0) == 0xe0)	//korsning hoger
 	{
 
@@ -264,27 +281,51 @@ int main(void)
 		pwm_init();
 		
 		SetUpIMU();
+		_delay_ms(5000);
+
+		while (1)
+		{
+			spi_indata = spi_tranciever(executed_command);
+			_delay_ms(1);
+
+			//_delay_ms(10);
+			autonomous_command(spi_indata);
+			//execute_command(spi_indata);
+		}
 
 
 		/*DDRB = 0<<PD3;
 		EIMSK = 1 <<INT2;*/
 		//_delay_ms(5000);
-		
-		/*while (1)
+		/*
+		while (1)
 		{
-			OCR2A=22;
-			_delay_ms(1000);
-			OCR2A=16;
-			_delay_ms(1000);
+			OCR1A = 260;
+			_delay_ms(3000);
+			OCR1A = 262;
+			_delay_ms(3000);
 		}
 		*/
-		OCR1B = 345; 
-		_delay_ms(3000);
-		while(distance_front > 15)
-		{
-			autonomous_driving();
-		}
-		drive_to_stopline();
+/*
+		blink_led(6);
+		_delay_ms(3000);*/
+		//while (1)
+	  // {
+/*
+		 	while((distance_front > 15)&&((camera_front > 35)||(camera_front==0)))
+		 	{
+			 	//blink_led(6);
+			 	autonomous_driving();
+		 	}
+		 	drive_to_stopline();*/
+/*
+		 	_delay_ms(1000);
+		 	drive_for_time('F',900,1);
+		 	turn_90_degrees('F','L');*/	
+		//}
+
+
+
 		//turn_90_degrees('F', 'R');
 		//turn_90_degrees('F', 'L');
 		//turn_90_degrees('F','R');

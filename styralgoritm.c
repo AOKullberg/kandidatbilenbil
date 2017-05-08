@@ -17,6 +17,9 @@
 volatile signed char prior_error_right = 0x00;
 volatile signed char prior_error_left = 0x00;
 
+int lost_right=0;
+int lost_left=0;
+
 volatile short prior_placement = 0;
 
 signed char calculate_error(char desired, unsigned char actual)
@@ -27,7 +30,7 @@ signed char calculate_error(char desired, unsigned char actual)
 
 signed char derivate(char error, signed char prior_error)
 {
-	signed char derivative = (error - prior_error)/iteration_time;
+	signed char derivative = (error - prior_error)/*/iteration_time*/;
 	return derivative;
 }
 
@@ -71,11 +74,52 @@ void one_line_control(char desired_distance, unsigned char actual_distance, sign
 		prior_error = error;
 }
 
+void check_lines()
+{
+	if (camera_left==100)
+	{
+		lost_left=1;
+	}
+	else
+	{
+		lost_left=0;
+	}
+	
+	if (camera_right==100)
+	{
+		lost_right=1;
+	}
+	else
+	{
+		lost_right=0;
+	}
+}
+
 void two_line_control(void)
 {
+	int prior_left=lost_left;
+	int prior_right=lost_right;
+	
+	check_lines();
+	
+	if ((lost_left && lost_right))
+	{
+		if (prior_right)
+		{
+			camera_left=0;
+		}
+		if (prior_left)
+		{
+			camera_right=0;
+		}
+	}
+	
+	
 	short placement = camera_left - camera_right;
-	short derivative = derivate(placement, prior_placement);
-	turn_both_directions(317+Kp*placement+Kd*derivative);
+	short derivative = placement-prior_placement;
+	executed_command=derivative;
+	turn_both_directions(8*(311+Kp*placement-Kd*derivative));
+	_delay_ms(50);
 	prior_placement = placement;
 }
 
@@ -142,12 +186,13 @@ void drive_backwards(unsigned char distance_backwards)
 
 void drive_for_time(char direction, int time, unsigned char speed)
 {
+	turn_both_directions(319);
 	int time_passed = 0;
 	if (direction == 'F')
 	{
+		accelerate(speed);
 		while(time >= time_passed)
-		{
-			accelerate(speed);
+		{			
 			_delay_ms(1);
 			time_passed = time_passed + 1;
 		}
@@ -155,9 +200,9 @@ void drive_for_time(char direction, int time, unsigned char speed)
 	}
 	else if (direction == 'B')
 	{
+		retardate(speed);
 		while(time >= time_passed)
 		{
-			retardate(speed);
 			_delay_ms(1);
 			time_passed = time_passed + 1;
 		}
@@ -180,8 +225,8 @@ void turn_90_degrees(char direction, char direction_turn)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;
-				OCR1A = 259;
-				accelerate(3);
+				OCR1A = 262;
+				accelerate(1);
 				Get_Angle();
 			}
 
@@ -190,12 +235,12 @@ void turn_90_degrees(char direction, char direction_turn)
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle < 80)
+			while (Angle < 60)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;
-				OCR1A = 373;
-				accelerate(3);
+				OCR1A = 382;
+				accelerate(1);
 				Get_Angle();
 			}
 
@@ -211,8 +256,8 @@ void turn_90_degrees(char direction, char direction_turn)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;				
-				OCR1A = 259;
-				retardate(3);
+				OCR1A = 262;
+				retardate(1);
 				Get_Angle();
 			}
 
@@ -225,8 +270,8 @@ void turn_90_degrees(char direction, char direction_turn)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;				
-				OCR1A = 373;
-				retardate(3);
+				OCR1A = 382;
+				retardate(1);
 				Get_Angle();
 			}
 
@@ -301,15 +346,10 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 
 void drive_to_stopline(void)
 {
-	while (camera_front > 32)
-	{
-		accelerate(4);
-	}
 	//while (velocity > 0)
 	//{
-	//	OCR1B = 326;
+		//OCR1B = 326;
 	//}
-		drive_for_time('F', 300, 4);
-		brake();
+	brake();
 } 
 

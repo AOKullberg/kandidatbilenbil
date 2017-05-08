@@ -16,7 +16,7 @@ void autonomous_driving(void)
 {
 	accelerate(1);
 	two_line_control();
-	_delay_ms(10);
+	//_delay_ms(10);
 }
 
 void korsning(void)

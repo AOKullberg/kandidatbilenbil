@@ -17,8 +17,8 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define Kp 0.6	//definiera Kp och Kd
-#define Kd 0.2
+#define Kp 0.7//definiera Kp och Kd
+#define Kd 2
 #define Kp_speed 1
 #define Kp_stop 1
 #define iteration_time 0.01
@@ -53,6 +53,7 @@ void blink_led(int nr);
 void get_sensor_data(unsigned char data);
 void transmit_uart1(unsigned char data);
 void transmit_spi(unsigned char data);
+unsigned char spi_tranciever(unsigned char data);
 void execute_command(unsigned char newcommand);
 void autonomous_command(unsigned char newcommand);
 

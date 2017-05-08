@@ -12,6 +12,11 @@
 extern volatile signed char prior_error_right;
 extern volatile signed char prior_error_left;
 
+extern volatile short prior_placement;
+
+int lost_right;
+int lost_left;
+
 signed char calculate_error(char desired, unsigned char actual);
 signed char derivate(char error, signed char prior_error);
 void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction);
@@ -25,6 +30,8 @@ void turn_90_degrees(char,char);
 void turn_x_degrees(char,char,char);
 void drive_for_time(char, int, unsigned char);
 void drive_to_stopline(void);
+
+
 
 
 
