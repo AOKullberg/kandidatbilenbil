@@ -26,6 +26,8 @@ extern volatile unsigned char distance_front;
 
 extern volatile unsigned char steering_decision;
 
+extern volatile unsigned char steering_command;
+
 extern volatile unsigned char position;
 
 void uart_init(void);
@@ -33,6 +35,7 @@ void spi_init(void);
 void transmit_uart0(unsigned char data);
 void transmit_uart1(unsigned char data);
 void transmit_spi(unsigned char data);
+unsigned char spi_tranciever(unsigned char data);
 void send_data(void);
 void get_sensor_data(unsigned char data);
 

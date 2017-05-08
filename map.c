@@ -189,15 +189,63 @@ void next_node(void)
 	position = 0;		
 }
 
+/* FUNCTION send_node_command(int node_type)
+* skickar till styr vilket kommando som skall utföras beroende
+* på nodtyp
+*/
+void send_node_command(int node_type)
+{
+	switch(node_type)
+	{
+		case 1 : //Utfart rakt gårdsplan
+		transmit_spi(0x80);
+		break;
+		
+		case 2 : //Utfart sväng gårdsplan
+		transmit_spi(0x90);
+		break;
+		
+		case 3 : //Infart rakt gårdsplan
+		transmit_spi(0xa0);
+		break;
+		
+		case 4 : //Infart sväng gårdsplan
+		transmit_spi(0xb0);
+		break;
+		
+		case 5 : //Korsning vänstersväng
+		transmit_spi(0xd0);
+		while(steering_decision != 0xff);
+		transmit_spi(0xc0);
+		break;
+		
+		case 6 : //Korsning högersväng
+		transmit_spi(0xe0);
+		while(steering_decision != 0xff);
+		transmit_spi(0xc0);
+		break;
+		
+		case 7 : //Korning rakt fram
+		transmit_spi(0xf0);
+		while(steering_decision != 0xff);
+		transmit_spi(0xc0);
+		break;
+		
+		case 8 : //Infart parkering
+		transmit_spi(0x82);
+		break;
+		
+		
+	}
+}
+
 /* FUNCTION execute_node_end()
 * utför korrekt kommando då bilen nått fram till en ny anslutande nod
 */
 void execute_node_end(void) //Todo: Om noden inte är en korsning, eller om framme vid målet
 {
 	int node_type = roadmap[route[current]][route[current-1]];
-	transmit_spi(node_type);//Utför sväng
-	while(1); //Vänta tills sväng färdig
+	send_node_command(node_type);
 	next_node();
-	transmit_spi(0x0a);//Fortsätt autonom körning
 }
 

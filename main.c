@@ -22,7 +22,7 @@
 
 
 //0=prog, 1=manual, 2=autonom
-int mode=0;
+int mode=2;
 
 /* Main-loop vid manuell körning
 */
@@ -43,26 +43,49 @@ void manual_main(void)
 */
 void autonom_main(void)
 {
+	blink_led(2,10);
 	if (change_mode)
 	{
 		mode=1;
 		change_mode=0;
 	}
-	else if ( (steering_decision == 0xaf) && (velocity == 0) ) //Om bilen stannat, vad innebär det för steering_decision?
+	else if ( (steering_decision == 0xf0)  ) //Om bilen stannat, vad innebär det för steering_decision?
 	{
-		if (100*position/dist_to_next > 95 ) //Kolla hur långt bilen kommit på vägsträckan, om den är i slutet har den nått en korsning
+		blink_led(1,10);
+		//_delay_ms(1000);
+		if (distance_front > 15)
+		{
+			steering_command = 0xd0;
+		}
+		
+		/*while (steering_decision!=0xff);
+		{
+			blink_led(2,10);
+			transmit_spi(0xd0);			
+		}
+		transmit_spi(0xc0);*/
+		/*if (100*position/dist_to_next > 95 ) //Kolla hur långt bilen kommit på vägsträckan, om den är i slutet har den nått en korsning
 		{
 			execute_node_end();
 		}
 		else
 		{
 			//Todo svänga förbi hinder?
-		}
+		}*/
+	}
+	else if (steering_decision==0xff)
+	{
+		steering_command=0xc0;
 	}
 	else
 	{
-		position+=velocity*0.01;//Todo bestämma vad detta värde ska vara för att ge rätt position
+		steering_command=0xc0;
 	}
+	
+//position+=velocity*0.01;//Todo bestämma vad detta värde ska vara för att ge rätt position
+
+//Skicka koden för autonomous driving
+
 }
 
 /*Main-loop vid programmeringsmode
@@ -89,12 +112,17 @@ int main(void)
 	sei();
 	uart_init();
 	spi_init();
-	show_number(1);
-
+	//show_number(1);
+	blink_led(2,10);
+	_delay_ms(1000);
 	
     while (1) 
     {
+
 		//send_data();
+		_delay_ms(1);
+		steering_decision = spi_tranciever(steering_command);
+		transmit_uart0(steering_decision);
 		switch(mode)
 		{
 			case 0 :

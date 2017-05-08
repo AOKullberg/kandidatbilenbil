@@ -32,7 +32,8 @@ unsigned char ack = 0x61;
 int counter = 0;
 
 //Styrbeslut
-volatile unsigned char steering_decision=0x00;
+volatile unsigned char steering_decision=0x01;
+volatile unsigned char steering_command=0x00;
 
 //Position
 volatile unsigned char position=0x00;
@@ -68,7 +69,7 @@ void spi_init(void)
 	//Sätter MOSI och SCK till outputs
 	DDRB = (1<<5)|(1<<7)|(1<<4);
 	// Enable SPI, Master, set clock rate fck/16
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)|(1<<SPIE);
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)/*|(1<<SPIE)*/;
 }
 
 /* FUNCTION transmit_uart0(unsigned char data)
@@ -100,6 +101,13 @@ void transmit_spi(unsigned char data)
 {
 	//Skicka data
 	SPDR = data;
+}
+
+unsigned char spi_tranciever(unsigned char data)
+{
+	SPDR = data;
+	while(!(SPSR & (1 << SPIF)));
+	return (SPDR);
 }
 
 /* FUNCTION send_data(void)
@@ -166,12 +174,12 @@ void get_sensor_data(unsigned char data)
 		case 7 :
 		if (data == ack)
 		{
-			blink_led(2,10);
+			//blink_led(2,10);
 			counter=0;
 		}
 		else
 		{
-			blink_led(1,10);
+			//blink_led(1,10);
 		}
 		break;
 	}
@@ -182,6 +190,7 @@ void get_sensor_data(unsigned char data)
 */
 ISR(SPI_STC_vect)
 {
+	//blink_led(4,10);
 	steering_decision=SPDR;
 }
 
