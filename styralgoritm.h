@@ -9,8 +9,8 @@
 #ifndef STYRALGORITM_H_
 #define STYRALGORITM_H_
 
-extern volatile signed char prior_error_right;
-extern volatile signed char prior_error_left;
+extern volatile short prior_right;
+extern volatile short prior_left;
 
 extern volatile short prior_placement;
 
@@ -30,6 +30,9 @@ void turn_90_degrees(char,char);
 void turn_x_degrees(char,char,char);
 void drive_for_time(char, int, unsigned char);
 void drive_to_stopline(void);
+void crossroad_left(void);
+void crossroad_right(void);
+void crossroad_forward(void);
 
 
 

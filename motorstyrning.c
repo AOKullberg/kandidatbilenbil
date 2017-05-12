@@ -61,14 +61,14 @@ void turn_right(short data)
 
 void turn_both_directions(short data)
 {
-	if (data > 382*8)
+	if (data > 380*8)
 	{
-		OCR1A = 382*8;
+		OCR1A = 380*8;
 		//transmit_spi(0x56);
 	}
-	else if (data < 240*8)
+	else if (data < 245*8)
 	{
-		OCR1A = 240*8;
+		OCR1A = 245*8;
 		//transmit_spi(0x48);
 	}
 	else
@@ -93,6 +93,11 @@ void turn_both_directions(short data)
 void accelerate(unsigned char data)
 {
 	reversing = 0;
+	short error=60-velocity;
+	
+
+
+/*
 	switch (data)
 	{
 		case 1:
@@ -118,8 +123,17 @@ void accelerate(unsigned char data)
 		case 6:
 		motor_speed = 358;
 		break;
+	}*/
+
+	if (error*Kp_speed + motor_speed < 2835)
+	{
+		OCR1B = motor_speed + error*Kp_speed;
 	}
-	OCR1B = motor_speed;
+	else
+	{
+		OCR1B = 2835;
+	}
+
 	//transmit_spi(0x41);
 }
 
@@ -138,31 +152,31 @@ void retardate(unsigned char data)
 		}*/
 		switch (data) {
 			case 1 :
-			OCR1B = 328;
+			OCR1B = 328*8;
 			break;
 
 			case 2 :
-			OCR1B = 327;
+			OCR1B = 327*8;
 			break;
 
 			case 3 :
-			OCR1B = 326;
+			OCR1B = 326*8;
 			break;
 
 			case 4 :
-			OCR1B = 325;
+			OCR1B = 325*8;
 			break;
 			
 			case 5 :
-			OCR1B = 324;
+			OCR1B = 324*8;
 			break;
 			
 			case 6 :
-			OCR1B = 323;
+			OCR1B = 323*8;
 			break;
 			
 			case 7 :
-			OCR1B = 322;
+			OCR1B = 322*8;
 			break;			
 		}
 		//transmit_spi(0x52);
@@ -172,6 +186,12 @@ void retardate(unsigned char data)
 
 void brake(void)
 {
-	OCR1B=8*345;
+	
+	if (OCR1B > 8*345)
+	{
+		OCR1B = 2400;
+		_delay_ms(40);
+		OCR1B=8*345;
+	}
 	//transmit_spi(0x53);
 }

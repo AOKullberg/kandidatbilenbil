@@ -23,7 +23,7 @@ void pwm_init(void)
 	TIMSK0 |= (1 << TOIE0); //enablar avbrott vid overflow av timer0
 	ICR1 = 36863;
 	OCR1A = 320*8;
-	OCR1B = 340*8;
+	OCR1B = 2720;
 	OCR2A = 19;
 }
 
@@ -45,5 +45,5 @@ void spi_init(void)
 	//Sätter MISO till output
 	DDRB = (1<<6);
 	/* Enable SPI, Slave, set clock rate fck/16 */
-	SPCR = (1<<SPE)/*|(1<<SPIE)*/;
+	SPCR = (1<<SPE)|(1<<SPIE);
 }

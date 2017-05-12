@@ -5,6 +5,7 @@
  *  Author: kargu357
  */
 
+#include "math.h"
 #include "styralgoritm.h"
 #include "main.h"
 #include "motorstyrning.h"
@@ -12,10 +13,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define Kp_speed 1
 
-volatile signed char prior_error_right = 0x00;
-volatile signed char prior_error_left = 0x00;
+volatile short prior_right = 0;
+volatile short prior_left = 0;
 
 int lost_right=0;
 int lost_left=0;
@@ -36,6 +36,7 @@ signed char derivate(char error, signed char prior_error)
 
 void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction)
 {
+/*
 	signed char error = calculate_error(desired_distance, actual_distance);
 	signed char derivative = derivate(error, prior_error);
 	if(error > 0)
@@ -54,11 +55,12 @@ void pd_steering_control(char desired_distance, unsigned char actual_distance, s
 	{
 		//OCR1A = 320;
 		prior_error = 0;
-	}
+	}*/
 }
 
 void one_line_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char side_of_road)
 {
+/*
 	signed char error = calculate_error(desired_distance, actual_distance);
 	signed char derivative = derivate(error, prior_error);
 	if(side_of_road == 'R')
@@ -71,12 +73,35 @@ void one_line_control(char desired_distance, unsigned char actual_distance, sign
 		turn_both_directions(320-(error*Kp+Kd*derivative));
 		prior_error_right = 0;
 	}
-		prior_error = error;
+		prior_error = error;*/
+}
+
+short calculate_angle(void)
+{
+	short diff_l=prior_left-camera_left;
+	short diff_r=prior_right-camera_left;
+	
+	short angle_l=10*atan(diff_l);
+	short angle_r=10*atan(diff_r);
+	
+	if (lost_left)
+	{
+		return angle_r;
+	}
+	else if (lost_right)
+	{
+		return angle_l;
+	}
+	else
+	{
+		return (angle_l+angle_r)/2;
+	}
+	
 }
 
 void check_lines()
 {
-	if (camera_left==100)
+	if (camera_left==50)
 	{
 		lost_left=1;
 	}
@@ -85,7 +110,7 @@ void check_lines()
 		lost_left=0;
 	}
 	
-	if (camera_right==100)
+	if (camera_right==50)
 	{
 		lost_right=1;
 	}
@@ -97,30 +122,29 @@ void check_lines()
 
 void two_line_control(void)
 {
-	int prior_left=lost_left;
-	int prior_right=lost_right;
 	
+	int prior_lost_left=lost_left;
+	int prior_lost_right=lost_right;
+	//int Kp_turn;
+	
+
 	check_lines();
 	
 	if ((lost_left && lost_right))
 	{
-		if (prior_right)
+		if (prior_lost_right)
 		{
 			camera_left=0;
 		}
-		if (prior_left)
+		if (prior_lost_left)
 		{
 			camera_right=0;
 		}
 	}
-	
-	
+		
 	short placement = camera_left - camera_right;
-	short derivative = placement-prior_placement;
-	executed_command=derivative;
-	turn_both_directions(8*(311+Kp*placement-Kd*derivative));
-	_delay_ms(50);
-	prior_placement = placement;
+	prior_placement = prior_left-prior_right;
+	turn_both_directions(8*(311+Kp*placement));
 }
 
 void cruise_control(unsigned char wanted_velocity)
@@ -166,11 +190,9 @@ void drive_forward_distance(float distance_forward)
 		//blink_led(3);
 		}
 		distance_travelled += (float)velocity*0.1; // Måste mäta hur lång tid loopen tar
-		OCR1B=motor_speed;
 		_delay_ms(100);
 	}
 	brake(); // får testa och se hur lång bromsstäckan blir
-	OCR1B=motor_speed;
 }
 
 
@@ -184,29 +206,34 @@ void drive_backwards(unsigned char distance_backwards)
 	retardate(1);
 }
 
-void drive_for_time(char direction, int time, unsigned char speed)
+void drive_for_time(char direction, int dist, unsigned char speed)
 {
-	turn_both_directions(319);
-	int time_passed = 0;
+	turn_both_directions(319*8);
+	int dist_passed = 0;
+
+	while (velocity==0)
+	{
+		accelerate(speed);
+	}
+	
 	if (direction == 'F')
 	{
 		accelerate(speed);
-		while(time >= time_passed)
+		while(dist > dist_passed)
 		{			
-			_delay_ms(1);
-			time_passed = time_passed + 1;
+			_delay_ms(10);
+			dist_passed += velocity * 0.1;
 		}
-		brake();
 	}
 	else if (direction == 'B')
 	{
+/*
 		retardate(speed);
-		while(time >= time_passed)
+		while(dist >= dist_passed)
 		{
-			_delay_ms(1);
-			time_passed = time_passed + 1;
-		}
-		brake();
+			_delay_ms(10);
+			dist_passed += velocity*0.01;
+		}*/
 	}
 	else
 	{
@@ -221,31 +248,29 @@ void turn_90_degrees(char direction, char direction_turn)
 	{
 		if(direction_turn == 'R')
 		{
-			while (Angle > -80)
+			while (Angle > -55)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;
-				OCR1A = 262;
+				turn_both_directions(0);
 				accelerate(1);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 320*8;
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle < 60)
+			while (Angle < 65)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;
-				OCR1A = 382;
+				turn_both_directions(10000);
 				accelerate(1);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 320*8;
 		}
 	}
 	else if (direction == 'B')
@@ -256,27 +281,25 @@ void turn_90_degrees(char direction, char direction_turn)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;				
-				OCR1A = 262;
+				turn_both_directions(0);
 				retardate(1);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 320*8;
 		}
 		else if (direction_turn == 'L')
 		{
-			while (Angle > -85)
+			while (Angle > -75)
 			{
 				time_calc_angle = 0;
 				TCNT0 = 0;				
-				OCR1A = 382;
+				turn_both_directions(10000);
 				retardate(1);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 8*320;
 		}
 	}
 }
@@ -290,27 +313,25 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 		{
 			while (Angle > - degrees)
 			{
-				OCR1A = 259;
+				turn_both_directions(0);
 				accelerate(1);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 320*8;
 		}
 		else if (direction_turn == 'L')
 		{
 			while (Angle < degrees)
 			{
-				OCR1A = 373;
+				time_calc_angle = 0;
+				TCNT0 = 0;
+				turn_both_directions(10000);
 				accelerate(1);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 320*8;
 		}
 	}
 	else if (direction == 'B')
@@ -319,37 +340,94 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 		{
 			while (Angle < degrees)
 			{
-				OCR1A = 259;
+				turn_both_directions(0);
 				retardate(1);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 8*320;
 		}
 		else if (direction_turn == 'L')
 		{
 			while (Angle > -degrees)
 			{
-				OCR1A = 373;
+				turn_both_directions(10000);
 				retardate(1);
-				_delay_ms(100);
 				Get_Angle();
 			}
 
-				OCR1A = 320;
-				brake();
+				OCR1A = 8*320;
 		}
 	}
 }
 
 void drive_to_stopline(void)
 {
-	//while (velocity > 0)
-	//{
-		//OCR1B = 326;
-	//}
+	while (camera_front > 0)
+	{
+		transmit_spi(0xf0);
+	}
 	brake();
+	_delay_ms(1000);
 } 
+
+void crossroad_left(void)
+{
+	_delay_ms(1000);
+	drive_for_time('F',600,1);
+	turn_x_degrees('F','L',20);
+	
+	lost_left=1;
+	lost_right=1;
+
+	while (lost_right)
+	{
+		transmit_spi(0xd0);
+		check_lines();
+		accelerate(1);
+		turn_both_directions(10000);		
+	}
+		
+	
+//	turn_90_degrees('F','L');
+}
+
+void crossroad_right(void)
+{
+	lost_left=1;
+	lost_right=1;
+	
+	_delay_ms(1000);
+	while (lost_left||lost_right)
+	{
+		transmit_spi(0xe0);
+		check_lines();
+		accelerate(1);
+		if (lost_right)
+		{
+			turn_both_directions(2000);
+		}
+		else
+		{
+			turn_both_directions(2560-1*camera_right);
+		}
+	}
+	
+}
+
+void crossroad_forward(void)
+{
+	lost_left=1;
+	lost_right=1;
+	turn_both_directions(319*8);
+	_delay_ms(1000);
+	drive_for_time('F',300,1);
+	while (lost_right)
+	{
+		check_lines();
+		accelerate(1);
+		turn_both_directions(8*(311+Kp*(camera_left-30)));
+		
+	}
+}
 

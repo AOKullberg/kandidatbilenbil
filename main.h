@@ -17,9 +17,9 @@
 //Macro för att undersöka en specifik bit
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define Kp 0.7//definiera Kp och Kd
-#define Kd 2
-#define Kp_speed 1
+#define Kp 1.8//definiera Kp och Kd
+#define Kd 1.5
+#define Kp_speed 0.05
 #define Kp_stop 1
 #define iteration_time 0.01
 
@@ -29,6 +29,7 @@
 #define stop_value_backwards 50
 
 extern volatile unsigned char executed_command;
+extern volatile unsigned char spi_indata;
 
 ///Sensordata///
 //Avstånd framåt

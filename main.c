@@ -38,7 +38,7 @@ volatile unsigned char camera_right = 0x00;
 volatile unsigned char camera_left = 0x00;
 volatile unsigned char camera_front = 0x00;
 unsigned char ack = 0x61;
-
+unsigned char distance_to_stopline=0;
 /*
 void blink_led( int nr)
 {
@@ -106,7 +106,6 @@ unsigned char spi_tranciever(unsigned char data)
 ISR(SPI_STC_vect)
 {
 	spi_indata=SPDR;
-	transmit_spi(executed_command);
 }
 
 //Avbrottsrutin d� ny data mottagits via UART
@@ -121,6 +120,7 @@ void get_sensor_data(unsigned char data)
 	{
 		case 0 :
 		velocity=data;
+		motor_speed=OCR1B;
 		++counter;
 		break;
 		
@@ -145,17 +145,29 @@ void get_sensor_data(unsigned char data)
 		break;
 		
 		case 5 :
+		prior_right=camera_right;
 		camera_right = data;
 		++counter;
 		break;
 		
 		case 6 :
+		prior_left=camera_left;
 		camera_left = data;
 		++counter;
 		break;
 		
 		case 7 :
 		camera_front = data;
+/*
+		if (camera_front>0)
+		{
+			distance_to_stopline=camera_front;
+			blink_led(6);
+		}
+		else
+		{
+			distance_to_stopline=0;
+		}*/
 		++counter;
 		break;
 		
@@ -213,37 +225,52 @@ void autonomous_command(unsigned char newcommand)
 	}
 	if (newcommand == 0xc0)		//V�gf�ljning
 	{
-		//blink_led(7);
-		if(((distance_front > 15) || (distance_front == 1))&&((camera_front > 35)||(camera_front==0)))
+		if(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
 		{
 			autonomous_driving();
-			//executed_command=0xc0;
+			transmit_spi(0xc0);
+		}
+		else if ((distance_front < 15)&& (distance_front!=1))
+		{
+			brake();
+			transmit_spi(0xdd);
 		}
 		else
 		{
-			blink_led(6);
-			drive_to_stopline();
-			//while (spi_indata==0xc0)
-			//{
-				executed_command=0xf0;
-			//}
-		//satta flagga
+			drive_to_stopline();			
 		}
-	}
+
+		}
+	
 	if (newcommand == 0xd0)	//korsning vanster
 	{
-		blink_led(7);
-		_delay_ms(1000);
-		drive_for_time('F',1200,1);
-		turn_90_degrees('F','L');
-		executed_command=0xff;
-}
-	if ((newcommand & 0xe0) == 0xe0)	//korsning hoger
-	{
+		transmit_spi(0xd0);
+		crossroad_left();
+		while (spi_indata!=0xc0)
+		{
+			transmit_spi(0xff);
+		}
 
 	}
-	if ((newcommand & 0xf0) == 0xf0)	//korsning rakt
+	if ((newcommand & 0xe0) == 0xe0)	//korsning hoger
 	{
+		transmit_spi(0xe0);
+		crossroad_right();
+		while (spi_indata!=0xc0)
+		{
+			transmit_spi(0xff);
+		}
+		
+
+	}
+	if (newcommand == 0x81)	//korsning rakt
+	{
+		transmit_spi(0x81);
+		crossroad_forward();
+		while (spi_indata!=0xc0)
+		{
+			transmit_spi(0xff);
+		}
 
 	}
 	if ((newcommand & 0x82) == 0x82)	//parkering 1
@@ -283,14 +310,63 @@ int main(void)
 		SetUpIMU();
 		_delay_ms(5000);
 
+	
+
+	/*while (1)
+	{
+			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
+			{
+				autonomous_driving();
+				executed_command=0xc0;
+			}
+
+		
+				//blink_led(6);
+				drive_to_stopline();
+				executed_command=0xf0;
+				crossroad_left();
+
+		
+			
+			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
+			{
+				autonomous_driving();
+				executed_command=0xc0;
+			}
+			
+			
+				//blink_led(6);
+				drive_to_stopline();
+				executed_command=0xf0;
+				_delay_ms(1000);
+				crossroad_right();
+
+			
+			
+			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
+			{
+				autonomous_driving();
+				executed_command=0xc0;
+			}
+			
+			
+				//blink_led(6);
+				drive_to_stopline();
+				executed_command=0xf0;
+				_delay_ms(1000);
+				crossroad_right();
+		
+	}
+*/
+
+
+			
+
+
 		while (1)
 		{
-			spi_indata = spi_tranciever(executed_command);
-			_delay_ms(1);
-
-			//_delay_ms(10);
+			_delay_ms(10);
 			autonomous_command(spi_indata);
-			//execute_command(spi_indata);
 		}
 
 
