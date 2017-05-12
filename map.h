@@ -13,8 +13,8 @@
 
 extern int no_nodes;
 extern int **distancemap;
-extern int **roadmap;
-extern int *route;
+extern int roadmap[6][6];
+extern int route[6];
 extern int current;
 extern int dist_to_next;
 extern int destination;

@@ -49,38 +49,52 @@ void autonom_main(void)
 		mode=1;
 		change_mode=0;
 	}
-	else if ( (steering_decision == 0xf0)  ) //Om bilen stannat, vad innebär det för steering_decision?
+	else if ( steering_decision == 0xf0  ) //Om bilen stannat, vad innebär det för steering_decision?
 	{
 		blink_led(1,10);
 		//_delay_ms(1000);
 		if (distance_front > 15)
 		{
-			steering_command = 0xd0;
-		}
-		
-		/*while (steering_decision!=0xff);
-		{
-			blink_led(2,10);
-			transmit_spi(0xd0);			
-		}
-		transmit_spi(0xc0);*/
-		/*if (100*position/dist_to_next > 95 ) //Kolla hur långt bilen kommit på vägsträckan, om den är i slutet har den nått en korsning
-		{
 			execute_node_end();
 		}
-		else
+		else 
 		{
-			//Todo svänga förbi hinder?
-		}*/
+			transmit_spi(0xc0);
+		}
+		
 	}
-	else if (steering_decision==0xff)
+	else if (steering_decision==0xc0)
 	{
-		steering_command=0xc0;
+		transmit_spi(0xc0);
 	}
 	else
 	{
-		steering_command=0xc0;
+		execute_node_end();
 	}
+	
+	
+	
+/*
+	else if (steering_decision==0xff)
+	{
+		transmit_spi(0xc0);
+	}
+	else if (steering_decision==0xd0)
+	{
+		transmit_spi(0xd0);
+	}
+	else if(steering_decision==0xe0)
+	{
+		transmit_spi(0xe0);
+	}
+	else if(steering_decision==0x81)
+	{
+		transmit_spi(0x81);
+	}
+	else
+	{
+		transmit_spi(0xc0);
+	}*/
 	
 //position+=velocity*0.01;//Todo bestämma vad detta värde ska vara för att ge rätt position
 
@@ -120,9 +134,12 @@ int main(void)
     {
 
 		//send_data();
-		_delay_ms(1);
-		steering_decision = spi_tranciever(steering_command);
-		transmit_uart0(steering_decision);
+		//transmit_uart0(route[current]);
+		_delay_ms(100);
+	//	transmit_uart0(steering_decision);
+		transmit_spi(0xc0);
+
+/*
 		switch(mode)
 		{
 			case 0 :
@@ -136,7 +153,7 @@ int main(void)
 			case 2 :
 			autonom_main();
 			break;
-		}
+		}*/
     }
 	
 }

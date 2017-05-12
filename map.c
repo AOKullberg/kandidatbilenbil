@@ -16,11 +16,18 @@
 /* Globala variabler
 */
 
-int no_nodes=0; //Antal noder i kartan
+int no_nodes=6; //Antal noder i kartan
 int** distancemap; //N x N-matris med avståndet mellan nod i och nod j
-int** roadmap; //N x N-matris som innehåller vilken nod som ansluter nod i till nod j (högersväng, vänstersväng etc)
-int* route;//1 x N-vektor som innehåller den senast beräknade snabbaste vägen från där rutten beräknades. Målnoden ligger först i vektorn.
-int current;//Anger på vilket element i route-vektorn som bilen befinner sig
+int	roadmap[6][6] = {
+		{99, 99, 6, 99, 99,7},
+		{99, 99, 99, 99, 99, 99},
+		{99, 99, 99, 99, 8, 99},
+		{99, 5, 99, 99, 99, 6},
+		{99, 7, 5, 99, 99, 99},
+		{99, 99, 99, 8, 99, 99}
+	}; //N x N-matris som innehåller vilken nod som ansluter nod i till nod j (högersväng, vänstersväng etc)
+int	route[6] = {2, 5, 3, 5, 3, 1};//1 x N-vektor som innehåller den senast beräknade snabbaste vägen från där rutten beräknades. Målnoden ligger först i vektorn.
+int current=5;//Anger på vilket element i route-vektorn som bilen befinner sig
 int dist_to_next;//Avstånd till nästa nod
 int destination;
 
@@ -50,6 +57,7 @@ void init_maps(void)
 {
 	int i;
 
+/*
 	distancemap = malloc(no_nodes * sizeof *distancemap);
 	for (i=0;i<no_nodes;i++)
 	{
@@ -62,7 +70,7 @@ void init_maps(void)
 		roadmap[i]=malloc(no_nodes * sizeof *roadmap[i]);
 	}
 	
-	route = malloc(no_nodes * sizeof *route);
+	route = malloc(no_nodes * sizeof *route);*/
 	
 }
 
@@ -73,6 +81,7 @@ void clear_maps(void)
 {
 	int i;
 	
+/*
 	for (i=0; i<no_nodes; i++)
 	{
 		free(roadmap[i]);
@@ -85,7 +94,7 @@ void clear_maps(void)
 	}
 	free(distancemap);
 	
-	free(route);
+	free(route);*/
 }
 /* FUNCTION update_distancemap()
 * tar emot en ny matris från datorn med information om avstånd mellan
@@ -125,6 +134,9 @@ void update_roadmap(void)
 	int j = 0;
 	cli();
 	
+
+	
+/*
 	for (i=0; i<no_nodes; i++)
 	{
 		for (j=0;j<no_nodes;j++)
@@ -132,7 +144,7 @@ void update_roadmap(void)
 			while ( !(UCSR0A & (1<<RXC0)) );
 			roadmap[i][j]=UDR0;
 		}
-	}
+	}*/
 	
 	sei();
 }
@@ -162,7 +174,11 @@ void check_map(int ** currentmap )
 */
 void new_route(int destination)
 {
-	int current_node=3;
+	int current_node=1;
+	
+
+	current=5;
+/*
 	for (int i=0; i<no_nodes; i++)
 	{
 		route[i]=0;
@@ -175,7 +191,7 @@ void new_route(int destination)
 	for(int i=0; i<no_nodes; i++)
 	{
 		transmit_uart0(route[i]);
-	}
+	}*/
 	transmit_uart0(current);
 }
 
@@ -185,8 +201,8 @@ void new_route(int destination)
 void next_node(void)
 {
 	current -=1;
-	dist_to_next = distancemap[route[current]][route[current-1]];
-	position = 0;		
+	//dist_to_next = distancemap[route[current]][route[current-1]];
+	//position = 0;		
 }
 
 /* FUNCTION send_node_command(int node_type)
@@ -214,24 +230,41 @@ void send_node_command(int node_type)
 		break;
 		
 		case 5 : //Korsning vänstersväng
-		transmit_spi(0xd0);
-		while(steering_decision != 0xff);
-		transmit_spi(0xc0);
+		if (steering_decision==0xd0)
+		{
+			transmit_spi(0xd0);
+		}
+		else if (steering_decision==0xff)
+		{
+			transmit_spi(0xc0);
+		}
 		break;
 		
 		case 6 : //Korsning högersväng
-		transmit_spi(0xe0);
-		while(steering_decision != 0xff);
-		transmit_spi(0xc0);
+		if (steering_decision==0xe0)
+		{
+			transmit_spi(0xe0);
+		}
+		else if (steering_decision==0xff)
+		{
+			transmit_spi(0xc0);
+		}
 		break;
 		
 		case 7 : //Korning rakt fram
-		transmit_spi(0xf0);
-		while(steering_decision != 0xff);
-		transmit_spi(0xc0);
+		if (steering_decision==0x81)
+		{
+			transmit_spi(0x81);
+		}
+		else if (steering_decision==0xff)
+		{
+			transmit_spi(0xc0);
+		}
 		break;
 		
-		case 8 : //Infart parkering
+		case 8 : //Stoppplats
+		
+		case 9 : //Infart parkering
 		transmit_spi(0x82);
 		break;
 		
@@ -246,6 +279,6 @@ void execute_node_end(void) //Todo: Om noden inte är en korsning, eller om fram
 {
 	int node_type = roadmap[route[current]][route[current-1]];
 	send_node_command(node_type);
-	next_node();
+	//next_node();
 }
 

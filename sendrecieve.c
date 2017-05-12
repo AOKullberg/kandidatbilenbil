@@ -69,7 +69,7 @@ void spi_init(void)
 	//Sätter MOSI och SCK till outputs
 	DDRB = (1<<5)|(1<<7)|(1<<4);
 	// Enable SPI, Master, set clock rate fck/16
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)/*|(1<<SPIE)*/;
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)|(1<<SPIE);
 }
 
 /* FUNCTION transmit_uart0(unsigned char data)
@@ -192,6 +192,7 @@ ISR(SPI_STC_vect)
 {
 	//blink_led(4,10);
 	steering_decision=SPDR;
+	//transmit_uart0(steering_decision);
 }
 
 /* Interrupt Service Routine
