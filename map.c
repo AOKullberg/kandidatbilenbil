@@ -4,6 +4,7 @@
  * Created: 2017-04-27 11:35:09
  *  Author: Tobias Fridén
  */ 
+#include "main.h"
 #include "dijsktra.h"
 #include "sendrecieve.h"
 #include "led_kom.h"
@@ -26,7 +27,7 @@ int	roadmap[6][6] = {
 		{99, 7, 5, 99, 99, 99},
 		{99, 99, 99, 8, 99, 99}
 	}; //N x N-matris som innehåller vilken nod som ansluter nod i till nod j (högersväng, vänstersväng etc)
-int	route[6] = {2, 5, 3, 5, 3, 1};//1 x N-vektor som innehåller den senast beräknade snabbaste vägen från där rutten beräknades. Målnoden ligger först i vektorn.
+int	route[6] = {1, 3, 5, 3, 5, 0};//1 x N-vektor som innehåller den senast beräknade snabbaste vägen från där rutten beräknades. Målnoden ligger först i vektorn.
 int current=5;//Anger på vilket element i route-vektorn som bilen befinner sig
 int dist_to_next;//Avstånd till nästa nod
 int destination;
@@ -230,40 +231,52 @@ void send_node_command(int node_type)
 		break;
 		
 		case 5 : //Korsning vänstersväng
-		if (steering_decision==0xd0)
+		transmit_spi(0xd0);
+		while (steering_decision!=0xff)
 		{
 			transmit_spi(0xd0);
+			send_data();
+			_delay_ms(10);
 		}
-		else if (steering_decision==0xff)
-		{
-			transmit_spi(0xc0);
-		}
+		transmit_spi(0xc0);
+		next_node();
 		break;
 		
 		case 6 : //Korsning högersväng
-		if (steering_decision==0xe0)
+		transmit_spi(0xe0);
+		while (steering_decision!=0xff)
 		{
 			transmit_spi(0xe0);
+			send_data();
+			_delay_ms(10);
 		}
-		else if (steering_decision==0xff)
-		{
-			transmit_spi(0xc0);
-		}
+		transmit_spi(0xc0);
+		next_node();
 		break;
 		
 		case 7 : //Korning rakt fram
-		if (steering_decision==0x81)
+		transmit_spi(0x81);
+		while (steering_decision!=0xff)
 		{
 			transmit_spi(0x81);
+			send_data();
+			_delay_ms(10);
 		}
-		else if (steering_decision==0xff)
-		{
-			transmit_spi(0xc0);
-		}
+		transmit_spi(0xc0);
+		next_node();
 		break;
 		
 		case 8 : //Stoppplats
-		
+		transmit_spi(0x82);
+		while (steering_decision!=0xff)
+		{
+			transmit_spi(0x82);
+			send_data();
+			_delay_ms(10);
+		}
+		transmit_spi(0xc0);
+		next_node();
+				
 		case 9 : //Infart parkering
 		transmit_spi(0x82);
 		break;
@@ -277,8 +290,18 @@ void send_node_command(int node_type)
 */
 void execute_node_end(void) //Todo: Om noden inte är en korsning, eller om framme vid målet
 {
-	int node_type = roadmap[route[current]][route[current-1]];
-	send_node_command(node_type);
-	//next_node();
+	blink_led(4,10);
+	if (current > 0)
+	{
+		int node_type = roadmap[route[current]][route[current-1]];
+		send_node_command(node_type);
+	}
+	else if (current==0)
+	{
+		transmit_spi(0xaa);
+		steering_decision=0xaa;
+		mode=1;
+	}
+
 }
 

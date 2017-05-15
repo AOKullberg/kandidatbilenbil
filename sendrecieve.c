@@ -5,6 +5,7 @@
  *  Author: Tobias Fridén
  */ 
 
+#include "map.h"
 #include "sendrecieve.h"
 #include "main.h"
 #include "led_kom.h"
@@ -28,8 +29,10 @@ volatile unsigned char distance_right = 0x00;
 volatile unsigned char distance_left = 0x00;
 volatile unsigned char camera_right = 0x00;
 volatile unsigned char camera_left = 0x00;
+volatile unsigned char camera_front = 0x00;
 unsigned char ack = 0x61;
 int counter = 0;
+
 
 //Styrbeslut
 volatile unsigned char steering_decision=0x01;
@@ -115,15 +118,17 @@ unsigned char spi_tranciever(unsigned char data)
 */
 void send_data(void)
 {
+
+
 	transmit_uart0(velocity);
 	transmit_uart0(distance_front);
-	transmit_uart0(distance_back);
-	transmit_uart0(distance_right);
-	transmit_uart0(distance_left);
 	transmit_uart0(camera_right);
 	transmit_uart0(camera_left);
+	transmit_uart0(camera_front);
 	transmit_uart0(steering_decision);
-	transmit_uart0(position);
+
+
+	transmit_uart0(route[current]);
 	transmit_uart0(ack);
 }
 
@@ -147,34 +152,23 @@ void get_sensor_data(unsigned char data)
 		break;
 		
 		case 2 :
-		distance_back=data;
-		++counter;
-		break;
-		
-		case 3 :
-		distance_right=data;
-		++counter;
-		break;
-		
-		case 4 :
-		distance_left = data;
-		++counter;
-		break;
-		
-		case 5 :
 		camera_right = data;
 		++counter;
 		break;
 		
-		case 6 :
+		case 3 :
 		camera_left = data;
 		++counter;
 		break;
 		
-		case 7 :
+		case 4 :
+		camera_front = data;
+		++counter;
+		break;
+		
+		case 5 :
 		if (data == ack)
 		{
-			//blink_led(2,10);
 			counter=0;
 		}
 		else

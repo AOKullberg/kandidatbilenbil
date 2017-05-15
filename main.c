@@ -19,7 +19,8 @@
 
 /*Globala variabler
 */
-
+int executing_node = 0;
+int node_finished = 0;
 
 //0=prog, 1=manual, 2=autonom
 int mode=2;
@@ -28,6 +29,7 @@ int mode=2;
 */
 void manual_main(void)
 {
+	blink_led(1,10);
 	if (change_mode)
 	{
 		mode=2;
@@ -44,15 +46,15 @@ void manual_main(void)
 void autonom_main(void)
 {
 	blink_led(2,10);
+	transmit_spi(0xc0);
 	if (change_mode)
 	{
 		mode=1;
 		change_mode=0;
 	}
-	else if ( steering_decision == 0xf0  ) //Om bilen stannat, vad innebär det för steering_decision?
+	else if ( steering_decision == 0xf0  )
 	{
-		blink_led(1,10);
-		//_delay_ms(1000);
+
 		if (distance_front > 15)
 		{
 			execute_node_end();
@@ -67,9 +69,9 @@ void autonom_main(void)
 	{
 		transmit_spi(0xc0);
 	}
-	else
+	else if (steering_decision==0xdd)
 	{
-		execute_node_end();
+		
 	}
 	
 	
@@ -127,19 +129,17 @@ int main(void)
 	uart_init();
 	spi_init();
 	//show_number(1);
-	blink_led(2,10);
+	//blink_led(2,10);
 	_delay_ms(1000);
+	transmit_spi(0xc0);
 	
     while (1) 
     {
 
-		//send_data();
-		//transmit_uart0(route[current]);
-		_delay_ms(100);
-	//	transmit_uart0(steering_decision);
-		transmit_spi(0xc0);
+		send_data();
+		_delay_ms(10);
 
-/*
+
 		switch(mode)
 		{
 			case 0 :
@@ -153,7 +153,7 @@ int main(void)
 			case 2 :
 			autonom_main();
 			break;
-		}*/
+		}
     }
 	
 }
