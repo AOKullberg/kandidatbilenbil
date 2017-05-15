@@ -22,83 +22,6 @@ int lost_left=0;
 
 volatile short prior_placement = 0;
 
-signed char calculate_error(char desired, unsigned char actual)
-{
-	signed char error = desired - actual;
-	return error;
-}
-
-signed char derivate(char error, signed char prior_error)
-{
-	signed char derivative = (error - prior_error)/*/iteration_time*/;
-	return derivative;
-}
-
-void pd_steering_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char direction)
-{
-/*
-	signed char error = calculate_error(desired_distance, actual_distance);
-	signed char derivative = derivate(error, prior_error);
-	if(error > 0)
-	{
-		if(direction == 'R')
-		{
-			turn_left(error*Kp+320+Kd*derivative);
-		}
-		else if(direction == 'L')
-		{
-			turn_right(320-error*Kp-Kd*derivative);
-		}
-		prior_error = error;
-	}
-	else
-	{
-		//OCR1A = 320;
-		prior_error = 0;
-	}*/
-}
-
-void one_line_control(char desired_distance, unsigned char actual_distance, signed char prior_error, char side_of_road)
-{
-/*
-	signed char error = calculate_error(desired_distance, actual_distance);
-	signed char derivative = derivate(error, prior_error);
-	if(side_of_road == 'R')
-	{
-		turn_both_directions(error*Kp+320+Kd*derivative);
-		prior_error_left = 0;
-	}
-	else if(side_of_road == 'L')
-	{
-		turn_both_directions(320-(error*Kp+Kd*derivative));
-		prior_error_right = 0;
-	}
-		prior_error = error;*/
-}
-
-short calculate_angle(void)
-{
-	short diff_l=prior_left-camera_left;
-	short diff_r=prior_right-camera_left;
-	
-	short angle_l=10*atan(diff_l);
-	short angle_r=10*atan(diff_r);
-	
-	if (lost_left)
-	{
-		return angle_r;
-	}
-	else if (lost_right)
-	{
-		return angle_l;
-	}
-	else
-	{
-		return (angle_l+angle_r)/2;
-	}
-	
-}
-
 void check_lines()
 {
 	if (camera_left==50)
@@ -125,8 +48,6 @@ void two_line_control(void)
 	
 	int prior_lost_left=lost_left;
 	int prior_lost_right=lost_right;
-	//int Kp_turn;
-	
 
 	check_lines();
 	
@@ -147,32 +68,6 @@ void two_line_control(void)
 	turn_both_directions(8*(311+Kp*placement));
 }
 
-void cruise_control(unsigned char wanted_velocity)
-{
-	accelerate((calculate_error(wanted_velocity,velocity) * Kp_speed)/10);
-	/*unsigned char distance_travelled_cruise;
-	while (wanted_velocity != velocity)
-	{
-		if (velocity < wanted_velocity)
-		{
-		accelerate();
-		//distance_travelled_cruise += velocity * 0.1;
-		}
-		retardate();
-		//distance_travelled_cruise += velocity * 0.1;
-	}
-	//distance_travelled_cruise += velocity * 0.1;
-	//return distance_travelled_cruise;
-	return 0;*/
-}
-
-
-//Kanske inte ska ligga som en egen funktion
-/*{
-	distance = velocity * 0.1;
-	return distance
-}
-*/
 
 void drive_forward_distance(float distance_forward)
 {
@@ -206,21 +101,24 @@ void drive_backwards(unsigned char distance_backwards)
 	retardate(1);
 }
 
-void drive_for_time(char direction, int dist, unsigned char speed)
+void drive_for_time(char direction, int dist, unsigned char speed, unsigned char steering_decision)
 {
+	transmit_spi(steering_decision);
 	turn_both_directions(319*8);
 	int dist_passed = 0;
 
 	while (velocity==0)
 	{
 		accelerate(speed);
+		transmit_spi(steering_decision);
 	}
 	
 	if (direction == 'F')
 	{
 		accelerate(speed);
 		while(dist > dist_passed)
-		{			
+		{	
+			transmit_spi(steering_decision);		
 			_delay_ms(10);
 			dist_passed += velocity * 0.1;
 		}
@@ -313,6 +211,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 		{
 			while (Angle > - degrees)
 			{
+				transmit_spi(0xe0);
 				turn_both_directions(0);
 				accelerate(1);
 				Get_Angle();
@@ -324,6 +223,7 @@ void turn_x_degrees(char direction, char direction_turn, char degrees)
 		{
 			while (Angle < degrees)
 			{
+				transmit_spi(0xd0);
 				time_calc_angle = 0;
 				TCNT0 = 0;
 				turn_both_directions(10000);
@@ -365,6 +265,7 @@ void drive_to_stopline(void)
 {
 	while (camera_front > 0)
 	{
+		two_line_control();
 		transmit_spi(0xf0);
 	}
 	brake();
@@ -374,11 +275,12 @@ void drive_to_stopline(void)
 void crossroad_left(void)
 {
 	_delay_ms(1000);
-	drive_for_time('F',600,1);
-	turn_x_degrees('F','L',20);
+	drive_for_time('F',600,1,0xd0);
+	turn_x_degrees('F','L',30);
 	
 	lost_left=1;
 	lost_right=1;
+
 
 	while (lost_right)
 	{
@@ -389,7 +291,6 @@ void crossroad_left(void)
 	}
 		
 	
-//	turn_90_degrees('F','L');
 }
 
 void crossroad_right(void)
@@ -421,13 +322,20 @@ void crossroad_forward(void)
 	lost_right=1;
 	turn_both_directions(319*8);
 	_delay_ms(1000);
-	drive_for_time('F',300,1);
+	drive_for_time('F',300,1,0x81);
 	while (lost_right)
 	{
+		transmit_spi(0x81);
 		check_lines();
 		accelerate(1);
 		turn_both_directions(8*(311+Kp*(camera_left-30)));
 		
 	}
+}
+
+void stopline(void)
+{
+	_delay_ms(1000);
+	drive_for_time('F',100,1,0x82);
 }
 

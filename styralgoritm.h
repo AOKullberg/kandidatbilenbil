@@ -28,11 +28,12 @@ void drive_backwards(unsigned char distance_backwards);
 void autonomous_driving(void);
 void turn_90_degrees(char,char);
 void turn_x_degrees(char,char,char);
-void drive_for_time(char, int, unsigned char);
+void drive_for_time(char, int, unsigned char, unsigned char);
 void drive_to_stopline(void);
 void crossroad_left(void);
 void crossroad_right(void);
 void crossroad_forward(void);
+void stopline(void);
 
 
 

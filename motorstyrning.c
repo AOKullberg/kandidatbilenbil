@@ -97,62 +97,40 @@ void accelerate(unsigned char data)
 	
 
 
-/*
-	switch (data)
+	if (OCR1B < 2800)
 	{
-		case 1:
-		motor_speed = 2825;  //ungefär 30cm/s min hastighet
-		break;
-
-		case 2:
-		motor_speed = 354; //ungefär 45cm/s
-		break;
-
-		case 3:
-		motor_speed = 355; //ungefär 70cm/s
-		break;
-
-		case 4:
-		motor_speed = 356; //ungefär 95cm/s max hastighet
-		break;
-		
-		case 5:
-		motor_speed = 357;
-		break;
-		
-		case 6:
-		motor_speed = 358;
-		break;
-	}*/
-
-	if (error*Kp_speed + motor_speed < 2835)
-	{
-		OCR1B = motor_speed + error*Kp_speed;
+		OCR1B=2800;
 	}
 	else
 	{
-		OCR1B = 2835;
+		if (error*Kp_speed + motor_speed < 2835)
+		{
+			OCR1B = motor_speed + error*Kp_speed;
+		}
+		else
+		{
+			OCR1B = 2835;
+		}
+	
 	}
 
-	//transmit_spi(0x41);
 }
 
-//void turn_camera
 
 void retardate(unsigned char data)
 	{
-		/*if (! reversing )
+		if (! reversing )
 		{
-			OCR1B = 345;
+			OCR1B = 345*8;
 			for (int i=0; i<177; i++)
 			{
 				_delay_ms(17);
 			}
 			reversing = 1;
-		}*/
+		}
 		switch (data) {
 			case 1 :
-			OCR1B = 328*8;
+			OCR1B = 330*8;
 			break;
 
 			case 2 :
@@ -179,7 +157,6 @@ void retardate(unsigned char data)
 			OCR1B = 322*8;
 			break;			
 		}
-		//transmit_spi(0x52);
 	}
 
 
@@ -189,9 +166,9 @@ void brake(void)
 	
 	if (OCR1B > 8*345)
 	{
-		OCR1B = 2400;
+		OCR1B = 8*345;
+/*
 		_delay_ms(40);
-		OCR1B=8*345;
+		OCR1B=8*345;*/
 	}
-	//transmit_spi(0x53);
 }

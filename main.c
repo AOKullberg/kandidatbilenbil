@@ -130,52 +130,27 @@ void get_sensor_data(unsigned char data)
 		break;
 		
 		case 2 :
-		distance_back=data;
-		++counter;
-		break;
-		
-		case 3 :
-		distance_right=data;
-		++counter;
-		break;
-		
-		case 4 :
-		distance_left = data;
-		++counter;
-		break;
-		
-		case 5 :
 		prior_right=camera_right;
 		camera_right = data;
 		++counter;
 		break;
 		
-		case 6 :
+		case 3 :
 		prior_left=camera_left;
 		camera_left = data;
 		++counter;
 		break;
 		
-		case 7 :
+		case 4 :
 		camera_front = data;
-/*
-		if (camera_front>0)
-		{
-			distance_to_stopline=camera_front;
-			blink_led(6);
-		}
-		else
-		{
-			distance_to_stopline=0;
-		}*/
 		++counter;
 		break;
 		
-		case 8 :
+		case 5 :
 		if (data == ack)
 		{
-			_delay_ms(20);
 			//blink_led(6);
+			_delay_ms(20);
 			counter=0;
 		}
 		else
@@ -191,21 +166,8 @@ void get_sensor_data(unsigned char data)
 
 
 
-//H�mtar vilket kommando som skall utf�ras givet insignal
-void execute_command(unsigned char newcommand)
-{
-	executed_command = 0x00;
-	if(CHECK_BIT(newcommand,0))
-	{
-		autonomous_command(newcommand);
-	}
-	else
-	{
-		manual_command(newcommand);
-	}
-}
 
-void autonomous_command(unsigned char newcommand)
+void execute_command(unsigned char newcommand)
 {
 	if ((newcommand & 0x80) == 0x80)		//Utfart g�rdsplan rakt
 	{
@@ -249,6 +211,7 @@ void autonomous_command(unsigned char newcommand)
 		while (spi_indata!=0xc0)
 		{
 			transmit_spi(0xff);
+			_delay_ms(10);
 		}
 
 	}
@@ -259,6 +222,7 @@ void autonomous_command(unsigned char newcommand)
 		while (spi_indata!=0xc0)
 		{
 			transmit_spi(0xff);
+			_delay_ms(10);
 		}
 		
 
@@ -270,11 +234,19 @@ void autonomous_command(unsigned char newcommand)
 		while (spi_indata!=0xc0)
 		{
 			transmit_spi(0xff);
+			_delay_ms(10);
 		}
 
 	}
-	if ((newcommand & 0x82) == 0x82)	//parkering 1
+	if ((newcommand & 0x82) == 0x82)	//stopplinje 
 	{
+		transmit_spi(0x82);
+		stopline();
+		while (spi_indata!=0xc0)
+		{
+			transmit_spi(0xff);
+			_delay_ms(10);
+		}
 		
 	}
 	if ((newcommand & 0x92) == 0x92)	//parkering 2
@@ -288,6 +260,15 @@ void autonomous_command(unsigned char newcommand)
 	if ((newcommand & 0xb2) == 0xb2)	//parkeringsficka
 	{
 		
+	}
+	if (newcommand == 0xaa)
+	{
+		brake();
+		blink_led(6);
+	}
+	if (newcommand < 0x1f)
+	{
+		manual_command(newcommand);
 	}
 }
 
@@ -309,147 +290,13 @@ int main(void)
 		
 		SetUpIMU();
 		_delay_ms(5000);
-
 	
-
-	/*while (1)
-	{
-			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
-			{
-				autonomous_driving();
-				executed_command=0xc0;
-			}
-
-		
-				//blink_led(6);
-				drive_to_stopline();
-				executed_command=0xf0;
-				crossroad_left();
-
-		
-			
-			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
-			{
-				autonomous_driving();
-				executed_command=0xc0;
-			}
-			
-			
-				//blink_led(6);
-				drive_to_stopline();
-				executed_command=0xf0;
-				_delay_ms(1000);
-				crossroad_right();
-
-			
-			
-			while(((distance_front > 15) || (distance_front == 1))&&(camera_front==0))
-			{
-				autonomous_driving();
-				executed_command=0xc0;
-			}
-			
-			
-				//blink_led(6);
-				drive_to_stopline();
-				executed_command=0xf0;
-				_delay_ms(1000);
-				crossroad_right();
-		
-	}
-*/
-
-
-			
-
-
 		while (1)
 		{
 			_delay_ms(10);
-			autonomous_command(spi_indata);
+			execute_command(spi_indata);
 		}
 
-
-		/*DDRB = 0<<PD3;
-		EIMSK = 1 <<INT2;*/
-		//_delay_ms(5000);
-		/*
-		while (1)
-		{
-			OCR1A = 260;
-			_delay_ms(3000);
-			OCR1A = 262;
-			_delay_ms(3000);
-		}
-		*/
-/*
-		blink_led(6);
-		_delay_ms(3000);*/
-		//while (1)
-	  // {
-/*
-		 	while((distance_front > 15)&&((camera_front > 35)||(camera_front==0)))
-		 	{
-			 	//blink_led(6);
-			 	autonomous_driving();
-		 	}
-		 	drive_to_stopline();*/
-/*
-		 	_delay_ms(1000);
-		 	drive_for_time('F',900,1);
-		 	turn_90_degrees('F','L');*/	
-		//}
-
-
-
-		//turn_90_degrees('F', 'R');
-		//turn_90_degrees('F', 'L');
-		//turn_90_degrees('F','R');
-		/*if (test_flag == 1)
-		{*/
-			/*	if (spi_indata == 0x0a)
-				{
-					//blink_led(6);
-					if(camera_front > 20)
-					{
-						autonomous_driving();
-					}
-					else
-					{
-						brake();
-						//satta flagga
-					}
-				}
-				else
-				{
-					brake();
-					blink_led(6);
-				}*/
-
-		//}
-			//pd_steering_control(desired_distance_right, distance_front, prior_error_right, 'R');		
-			/*if (distance_front > 50)
-			{
-				accelerate(1);
-				if (camera_left < 60)
-				{
-					pd_steering_control(desired_distance_left, camera_left, prior_error_left, 'L');
-				}
-				else if (camera_right < 60)
-				{
-					
-					pd_steering_control(desired_distance_right, camera_right, prior_error_right, 'R');
-				}
-	
-				_delay_ms(100);
-			}
-			else
-			{
-				brake();
-				_delay_ms(100);
-			}*/
-			
-		
 		
 
 }
