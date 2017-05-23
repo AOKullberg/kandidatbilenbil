@@ -1,3 +1,10 @@
+/*
+ * map.c
+ *
+ * Created: 2017-04-30 15:10:47
+ * Author: Caroline Wasing
+ * version 1.0
+ */ 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <iostream>
@@ -10,10 +17,6 @@
 #include "laser.hpp"
 
 using namespace std;
-
-//Klass för att hantera i2c-interfacet
-
-
 
 /*FUNCTION setup(string)
  * Öppnar en anslutning till i2c-bussen som man sedan kommer åt
@@ -100,9 +103,11 @@ int ping_laser_distance(i2cReadWrite i2c ){
 		delayMicroseconds(1);
 	}
 	
-	//Läs mätresultat
+	//Läs mätresultat 2 bytes
 	i2c.readi2cData(0x8f, RxBuffer, 2);
-	if( RxBuffer[0] >= 0x01 ){
+	
+	//Vill endast returnera 1 byte
+	if( RxBuffer[0] >= 0x01 ){ 
 		data = 255;
 	}
 	else{
@@ -114,6 +119,9 @@ int ping_laser_distance(i2cReadWrite i2c ){
 	
 }
 
+/*FUNCTION reset_i2c( i2c )
+ * Återställer lasern genom att skriva till register 0x00
+ */
 void reset_i2c(i2cReadWrite i2c){
 
 	unsigned char reset[1]{0};
