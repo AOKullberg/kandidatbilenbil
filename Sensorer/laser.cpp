@@ -1,5 +1,5 @@
 /*
- * map.c
+ * laser.cpp
  *
  * Created: 2017-04-30 15:10:47
  * Author: Caroline Wasing
