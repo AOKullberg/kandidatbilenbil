@@ -7,7 +7,7 @@ class i2cReadWrite {
 	public:
 	int file_i2c; //filehandle
 	
-	void setup(string filename);
+	void setup(std::string filename);
 	void readi2cData(unsigned char RegisterAddress, unsigned char * RxBuffer, int length);
 	void writei2cData(unsigned char RegisterAddress, unsigned char * TxBuffer, int length);
 };

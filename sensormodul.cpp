@@ -2,6 +2,7 @@
  * Huvudfil för sensormodulen. Initierar kommunikation med dator
  * och startar sen bildbehandling, kompression etc.
  */
+#include <wiringPi.h>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -11,6 +12,7 @@
 #include "Bildbehandling/bildbehandling.hpp"
 #include "Kommunikation/kommunikation_klient.hpp"
 #include "Compression/compression.hpp"
+#include "Sensorer/sensorer.hpp"
 
 #define PI 3.141592
 
@@ -34,6 +36,9 @@ bool img_ready = false;
 
 //För kommunikation med styr/kom
 int sign_found = 0;
+condition_variable dist_cv;
+mutex mut_dist;
+bool dist_ready = false;
 
 //För kommunikation med dator
 extern TcpSocket socket;
@@ -43,6 +48,11 @@ mutex mut_camera;
 condition_variable camera_cv;
 bool camera_ready = false;
 
+void restart()
+{
+	system("/home/pi/Desktop/Bilen_Original/restart");
+}
+
 int main()
 {
 	/* Initierar kameran & sätter parametrar.
@@ -51,16 +61,19 @@ int main()
 	 */
 	raspicam::RaspiCam_Cv Camera;
 	Camera.set(CV_CAP_PROP_FORMAT,CV_8UC3);
-	Camera.set(CV_CAP_PROP_FRAME_WIDTH,640);
-	Camera.set(CV_CAP_PROP_FRAME_HEIGHT,480);
+	Camera.set(CV_CAP_PROP_FRAME_WIDTH,320);
+	Camera.set(CV_CAP_PROP_FRAME_HEIGHT,240);
 	if(!Camera.open())
 	{
 		cerr << "Error opening camera";
+		thread t(restart);
+		t.detach();
+		return 1;
 	}
 	
 	/* Initierar wifi-anslutningen till datorn. Förutsätter
 	 * att de är anslutna till ett ad-hoc-nätverk.
-	 */
+	 *//*
 	if(init_connection() != Socket::Done)
 	{
 		cerr << "Can't connect to host\n" << "Please restart the application\n";
@@ -68,16 +81,17 @@ int main()
 	else
 	{
 		cout << "Connection established!\n";
-	}
+	}*/
 	
 	if(sensor_setup() == -1)
 	{
 		cerr << "Error setting up sensors\n" << "Please restart the application\n";
 	}
-	thread kommunikation(com_main);
+	//thread kommunikation(send_image);
 	thread bildbehandling(img_proc_main);
-	thread img_compression(img_comp_main);
+	//thread img_compression(img_comp_main);
 	thread speed(measure_speed);
+	speed.detach();
 	
 	/* Huvudloop
 	 * Tar en bild från kameran och skapar sedan en bildbehandlingstråd
@@ -96,6 +110,7 @@ int main()
 		read_sensors();
 		send_sensor_data();
 		
+		
 	/* Väntar på att användaren trycker på esc i ett visst antal ms.
 	 * Avbryter då loopen.
 	 */
@@ -109,9 +124,9 @@ int main()
 	 */
 	end_program = true;
 	bildbehandling.join();
-	kommunikation.join();
-	img_compression.join();
-	speed.join();
+	//kommunikation.join();
+	//img_compression.join();
+	//speed.join();
 	socket.disconnect();
 	Camera.release();
 	return 0;

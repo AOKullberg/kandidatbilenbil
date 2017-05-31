@@ -6,6 +6,7 @@
 #include <vector>
 #include "hallsensor.hpp"
 
+using namespace std;
 /* FUNCTION ping_hall_myseconds( int, int )
  * pingar hallsensorn på pinnen inputpin, samplar max_samples antal
  * gånger och returnerar medianen
@@ -20,7 +21,7 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 	while( digitalRead(inputpin) ){
 		delay(1);
 		++msec;
-		if(msec >= 300 ){
+		if(msec >= 100 ){
 			return 0;
 		}
 	}
@@ -33,10 +34,9 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 		while( ! digitalRead(inputpin) ){
 			delay(1);
 			++msec;
-			if(msec >= 300 ){
+			if(msec >= 100 ){
 				return 0;
 			}
-			
 		}
 		
 		msec = 0;
@@ -45,7 +45,7 @@ int ping_hall_myseconds( int inputpin, int max_samples ){
 			delay(1);
 			++ msec;
 			
-			if(msec >= 300 ){
+			if(msec >= 100 ){
 				return 0;
 			}
 		}

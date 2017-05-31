@@ -10,7 +10,6 @@
 #include "laser.hpp"
 
 using namespace std;
-
 //Klass för att hantera i2c-interfacet
 
 
@@ -80,7 +79,6 @@ using namespace std;
  * returnerar avstånd i cm
  */
 int ping_laser_distance(i2cReadWrite i2c ){
-	
 	unsigned char RxBuffer[2]{0};
 	unsigned char TxBuffer[1]{0};
 	int data;
@@ -102,14 +100,14 @@ int ping_laser_distance(i2cReadWrite i2c ){
 	
 	//Läs mätresultat
 	i2c.readi2cData(0x8f, RxBuffer, 2);
-	if( RxBuffer[0] >= 0x01 ){
+	if( (int)RxBuffer[0] > 0 ){
 		data = 255;
 	}
 	else{
 		data = RxBuffer[1];
 	}
 
-	
+	//cout << (int)RxBuffer[0] << " " << (int)RxBuffer[1] << endl;
 	return data;
 	
 }
